@@ -12,26 +12,26 @@ uploaded_file = st.file_uploader("Pilih file PDF", type="pdf")
 if uploaded_file is not None:
     st.info("Membaca file PDF...")
     try:
-        # Siapkan tempat untuk menyimpan Excel di memori
-        output = io.BytesIO()
+        semua_tabel = []
         
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            with pdfplumber.open(uploaded_file) as pdf:
-                tabel_ditemukan = 0
-                for i, page in enumerate(pdf.pages):
-                    tables = page.extract_tables()
-                    for j, table in enumerate(tables):
-                        if table:
-                            tabel_ditemukan += 1
-                            # Baris pertama PDF jadi header Excel
-                            df = pd.DataFrame(table[1:], columns=table[0])
-                            sheet_name = f"Hal_{i+1}_Tab_{j+1}"
-                            df.to_excel(writer, sheet_name=sheet_name, index=False)
+        # 1. Ekstrak data dulu tanpa membuat Excel
+        with pdfplumber.open(uploaded_file) as pdf:
+            for i, page in enumerate(pdf.pages):
+                tables = page.extract_tables()
+                for j, table in enumerate(tables):
+                    if table:
+                        semua_tabel.append((i+1, j+1, table))
         
-        if tabel_ditemukan > 0:
-            st.success(f"Berhasil! Ditemukan {tabel_ditemukan} tabel.")
+        # 2. Cek apakah ada tabel yang berhasil diekstrak
+        if len(semua_tabel) > 0:
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                for hal, tab_idx, table in semua_tabel:
+                    df = pd.DataFrame(table[1:], columns=table[0])
+                    sheet_name = f"Hal_{hal}_Tab_{tab_idx}"
+                    df.to_excel(writer, sheet_name=sheet_name, index=False)
             
-            # Tombol Download
+            st.success(f"Berhasil! Ditemukan {len(semua_tabel)} tabel.")
             st.download_button(
                 label="⬇️ Download File Excel",
                 data=output.getvalue(),
@@ -39,7 +39,7 @@ if uploaded_file is not None:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
         else:
-            st.warning("Tidak ada tabel bergaris yang terdeteksi di dalam file PDF ini.")
+            st.warning("Tabel tidak terdeteksi. Sistem ini paling optimal untuk tabel PDF yang memiliki garis kotak (border) yang jelas.")
             
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memproses: {e}")
