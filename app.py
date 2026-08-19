@@ -45,7 +45,7 @@ with col_input2:
     )
 
 st.write(
-    "Unggah dokumen kepabeanan Anda. Sistem akan mengekstrak informasi dan menyusunnya"
+    "Unggah dokumen Invoice dan Packing List. Sistem akan mengekstrak informasi dan menyusunnya"
     " secara presisi ke dalam sheet BARANG dan multi-sheet CEISA 4.0 lainnya."
 )
 st.markdown("---")
@@ -78,27 +78,37 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
     elif not nomor_aju:
         st.warning("⚠️ Mohon isi Nomor Aju terlebih dahulu.")
     else:
-        with st.spinner("Mengekstrak data PDF dan menyusun Sheet BARANG..."):
+        with st.spinner("Mengekstrak data PDF (Invoice & Packing List) dan menyusun Sheet BARANG..."):
             try:
                 items_data = []
                 merek_perusahaan = "PROSIND CONSULTING & ENGINEERING PTY.LTD."
 
-                # [A] LOGIKA EKSTRAKSI INVOICE & PACKING LIST
+                # [A] EKSTRAKSI TEKS PDF INVOICE
                 inv_text = ""
                 if inv_file:
                     with pdfplumber.open(inv_file) as pdf:
                         inv_text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
 
+                # [B] EKSTRAKSI TEKS PDF PACKING LIST (Untuk Netto)
                 pl_text = ""
+                netto_values = []
                 if pl_file:
                     with pdfplumber.open(pl_file) as pdf:
-                        pl_text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                        for page in pdf.pages:
+                            p_text = page.extract_text()
+                            if p_text:
+                                pl_text += p_text + "\n"
+                    # Mencari seluruh keterangan Net weight ea. di packing list
+                    netto_matches = re.findall(r"Net weight ea\.?\s*([\d\.]+)\s*kg", pl_text, re.IGNORECASE)
+                    if not netto_matches:
+                        netto_matches = re.findall(r"Net weight\s*([\d\.]+)\s*kg", pl_text, re.IGNORECASE)
+                    netto_values = [float(w) for w in netto_matches]
 
                 # Ekstraksi baris dari Invoice
                 lines = inv_text.split("\n")
                 current_item = {}
                 seri_counter = 1
-                price_pattern = re.compile(r"^(\d+)\s+([\d\.]+)\s+([\d\.]+)$")
+                item_index = 0
 
                 for i, line in enumerate(lines):
                     line = line.strip()
@@ -106,6 +116,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         if current_item:
                             items_data.append(current_item)
                             current_item = {}
+                            item_index += 1
 
                         current_item["NOMOR AJU"] = nomor_aju
                         current_item["SERI BARANG"] = seri_counter
@@ -113,6 +124,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         
                         current_item["KODE BARANG"] = line.split("-")[-1].strip()
                         
+                        # Ambil Uraian dan Jumlah Satuan (QTY) dari baris sebelumnya
                         if i > 0:
                             prev_line = lines[i - 1].strip()
                             match_desc_qty = re.match(r"^(.*?)\s+(\d+)$", prev_line)
@@ -127,48 +139,76 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         hs_match = re.search(r"HS Code\s+([\d\.]+)", line)
                         if hs_match and current_item:
                             current_item["HS"] = hs_match.group(1).replace(".", "")
+                        
+                        # Harga satuan dan CIF dari baris yang mengandung HS Code / pola harga
+                        # Format contoh: 1   1706.00   6824.00 (SERI, HARGA SATUAN, HS TOTAL CURR)
+                        price_hs_match = re.search(r"(\d+)\s+([\d\.]+)\s+([\d\.]+)$", line)
+                        if price_hs_match and current_item:
+                            current_item["HARGA SATUAN"] = float(price_hs_match.group(2))
+                            cif_val = float(price_hs_match.group(3))
+                            current_item["CIF"] = cif_val
+                            current_item["FOB"] = cif_val
 
-                    elif "Net weight ea." in line:
-                        weight_match = re.search(r"([\d\.]+)\s*kg", line)
-                        if weight_match and current_item:
-                            current_item["NETTO"] = float(weight_match.group(1))
-
-                    else:
-                        price_match = price_pattern.match(line)
-                        if price_match and current_item:
-                            current_item["HARGA SATUAN"] = float(price_match.group(2))
-                            
-                            # Memasukkan nilai default & dinamis dari input aplikasi
-                            current_item["MEREK"] = merek_perusahaan
-                            current_item["TIPE"] = "TANPA TIPE"
-                            current_item["UKURAN"] = "-"
-                            current_item["SPESIFIKASI LAIN"] = "-"
-                            current_item["KODE KEMASAN"] = "BX"
-                            current_item["JUMLAH KEMASAN"] = 1
-                            current_item["CIF"] = 6824
-                            current_item["CIF RUPIAH"] = 89414570.19
-                            current_item["NDPBM"] = ndpbm_input  # Mengambil nilai dari input halaman utama
-                            current_item["FOB"] = 6824
-                            current_item["ASURANSI"] = 0
-                            current_item["FREIGHT"] = 247.42
-                            current_item["NILAI TAMBAH"] = 0
-                            current_item["DISKON"] = 0
-                            current_item["HARGA PENYERAHAN"] = 0
-                            current_item["HARGA PEROLEHAN"] = 0
-                            current_item["HARGA EKSPOR"] = 0
-                            current_item["NILAI BARANG"] = 0
-                            current_item["NILAI JASA"] = 0
-                            current_item["KODE JENIS NILAI"] = "LAI"
-                            current_item["KODE KONDISI BARANG"] = 1
-                            current_item["KODE NEGARA ASAL"] = "AU"
-                            current_item["ISI PER KEMASAN"] = 0
-                            current_item["METODE PENENTUAN NILAI"] = "Metode 1"
-                            current_item["STATEMENT PERBEDAAN HARGA"] = "T"
+                # Ambil tambahan baris harga jika polanya terpisah di baris berikutnya
+                for i, line in enumerate(lines):
+                    line = line.strip()
+                    price_pattern = re.compile(r"^(\d+)\s+([\d\.]+)\s+([\d\.]+)$")
+                    price_match = price_pattern.match(line)
+                    if price_match and len(items_data) > 0:
+                        # Cocokkan dengan item berdasarkan nomor seri
+                        seri_num = int(price_match.group(1))
+                        for item in items_data:
+                            if item.get("SERI BARANG") == seri_num:
+                                item["HARGA SATUAN"] = float(price_match.group(2))
+                                cif_val = float(price_match.group(3))
+                                item["CIF"] = cif_val
+                                item["FOB"] = cif_val
 
                 if current_item:
                     items_data.append(current_item)
 
-                # [B] DEFINISI STRUKTUR 21 MULTI-SHEET CEISA 4.0
+                # Masukkan nilai Netto dari Packing List dan nilai-nilai default ke setiap item barang
+                for idx, item in enumerate(items_data):
+                    # Ambil netto berdasarkan urutan item, atau default 0 jika tidak ketemu
+                    if idx < len(netto_values):
+                        item["NETTO"] = netto_values[idx]
+                    else:
+                        item["NETTO"] = 0.0
+
+                    item["MEREK"] = merek_perusahaan
+                    item["TIPE"] = "TANPA TIPE"
+                    item["UKURAN"] = "-"
+                    item["SPESIFIKASI LAIN"] = "-"
+                    item["KODE SATUAN"] = "PCE" # Default satuan jika tidak terekstrak
+                    item["KODE KEMASAN"] = "BX"
+                    item["JUMLAH KEMASAN"] = 1
+                    
+                    # Jika CIF belum terisi dari parsing, beri nilai default 0
+                    if "CIF" not in item:
+                        item["CIF"] = 0.0
+                        item["FOB"] = 0.0
+
+                    item["CIF RUPIAH"] = 89414570.19
+                    item["NDPBM"] = ndpbm_input
+                    item["ASURANSI"] = 0
+                    item["FREIGHT"] = 247.42
+                    item["NILAI TAMBAH"] = 0
+                    item["DISKON"] = 0
+                    item["HARGA PENYERAHAN"] = 0
+                    item["HARGA PEROLEHAN"] = 0
+                    if "HARGA SATUAN" not in item:
+                        item["HARGA SATUAN"] = 0.0
+                    item["HARGA EKSPOR"] = 0
+                    item["NILAI BARANG"] = 0
+                    item["NILAI JASA"] = 0
+                    item["KODE JENIS NILAI"] = "LAI"
+                    item["KODE KONDISI BARANG"] = 1
+                    item["KODE NEGARA ASAL"] = "AU"
+                    item["ISI PER KEMASAN"] = 0
+                    item["METODE PENENTUAN NILAI"] = "Metode 1"
+                    item["STATEMENT PERBEDAAN HARGA"] = "T"
+
+                # [C] DEFINISI STRUKTUR 21 MULTI-SHEET CEISA 4.0
                 df_header = pd.DataFrame(columns=[
                     'NOMOR AJU', 'KODE DOKUMEN', 'KODE KANTOR', 'KODE KANTOR BONGKAR', 'KODE KANTOR PERIKSA', 
                     'KODE KANTOR TUJUAN', 'KODE KANTOR EKSPOR', 'KODE JENIS IMPOR', 'KODE JENIS EKSPOR', 'KODE JENIS TPB'
