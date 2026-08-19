@@ -5,6 +5,7 @@ import re
 import io
 
 # --- 1. PENGATURAN TAMPILAN UTAMA ---
+# Mengubah judul di tab browser
 st.set_page_config(page_title="KODEX - PT. Setia Samudera Abadi", page_icon="🚢", layout="wide")
 
 # CSS Kustom untuk tampilan yang elegan, bersih, dan profesional
@@ -24,17 +25,13 @@ st.markdown("""
 # --- 2. HEADER APLIKASI ---
 st.title("KODEX 🚢")
 st.markdown("### *Kompilator Dokumen Ekspor-Impor | PT. Setia Samudera Abadi*")
-st.write("Unggah dokumen kepabeanan Anda. Sistem akan mengekstrak informasi untuk disatukan menjadi satu file Excel template CEISA 4.0.")
+st.write("Unggah dokumen kepabeanan Anda. Sistem akan mengekstrak informasi dari Invoice, Packing List, HBL, MBL, dan Manifest BC 1.1 untuk disatukan menjadi satu file Excel template CEISA 4.0.")
 st.markdown("---")
 
-# --- 3. INPUT NILAI KURS ---
-st.subheader("💱 Pengaturan Nilai Kurs")
-ndpbm_rate = st.number_input("Masukkan Nilai NDPBM (Kurs Pajak Hari Ini dalam Rupiah):", min_value=1.0, value=15000.0, step=100.0)
-st.markdown("---")
-
-# --- 4. AREA UPLOAD ---
+# --- 3. AREA UPLOAD (Dibuat grid/kolom agar rapi) ---
 st.subheader("📥 Unggah Dokumen Pendukung")
 
+# Baris pertama (3 Kolom)
 col1, col2, col3 = st.columns(3)
 with col1:
     inv_file = st.file_uploader("1. Invoice", type="pdf")
@@ -43,6 +40,7 @@ with col2:
 with col3:
     hbl_file = st.file_uploader("3. House B/L", type="pdf")
 
+# Baris kedua (2 Kolom + 1 Info)
 col4, col5, col6 = st.columns(3)
 with col4:
     mbl_file = st.file_uploader("4. Master B/L", type="pdf")
@@ -53,24 +51,95 @@ with col6:
 
 st.markdown("---")
 
-# --- 5. DAFTAR 70 KOLOM CEISA ---
-ceisa_columns = [
-    'NOMOR AJU', 'SERI BARANG', 'HS', 'KODE BARANG', 'URAIAN', 'MEREK', 'TIPE', 'UKURAN', 'SPESIFIKASI LAIN', 
-    'KODE SATUAN', 'JUMLAH SATUAN', 'KODE KEMASAN', 'JUMLAH KEMASAN', 'KODE DOKUMEN ASAL', 'KODE KANTOR ASAL', 
-    'NOMOR DAFTAR ASAL', 'TANGGAL DAFTAR ASAL', 'NOMOR AJU ASAL', 'SERI BARANG ASAL', 'NETTO', 'BRUTO', 'VOLUME', 
-    'SALDO AWAL', 'SALDO AKHIR', 'JUMLAH REALISASI', 'CIF', 'CIF RUPIAH', 'NDPBM', 'FOB', 'ASURANSI', 'FREIGHT', 
-    'NILAI TAMBAH', 'DISKON', 'HARGA PENYERAHAN', 'HARGA PEROLEHAN', 'HARGA SATUAN', 'HARGA EKSPOR', 'HARGA PATOKAN', 
-    'NILAI BARANG', 'NILAI JASA', 'NILAI DANA SAWIT', 'NILAI DEVISA', 'PERSENTASE IMPOR', 'KODE ASAL BARANG', 
-    'KODE DAERAH ASAL', 'KODE GUNA BARANG', 'KODE JENIS NILAI', 'JATUH TEMPO ROYALTI', 'KODE KATEGORI BARANG', 
-    'KODE KONDISI BARANG', 'KODE NEGARA ASAL', 'KODE PERHITUNGAN', 'PERNYATAAN LARTAS', 'FLAG 4 TAHUN', 'SERI IZIN', 
-    'TAHUN PEMBUATAN', 'KAPASITAS SILINDER', 'KODE BKC',Script yang Anda buat sudah sangat rapi dan terstruktur dengan baik! Penggunaan UI Streamlit dengan tata letak kolom, CSS kustom, serta logika ekstraksi awal menggunakan `pdfplumber` dan *Regex* (Regular Expression) menunjukkan fondasi aplikasi yang sangat solid untuk proyek KODEX ini.
+# --- 4. TOMBOL PROSES & LOGIKA EKSTRAKSI ---
+if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
+    # Validasi apakah ada file yang diunggah
+    if not (inv_file or pl_file or hbl_file or mbl_file or bc_file):
+        st.warning("⚠️ Mohon unggah minimal satu dokumen untuk memulai proses.")
+    else:
+        with st.spinner("Menganalisis dokumen dan menyusun matriks data CEISA..."):
+            try:
+                items_data = []
+                
+                # [A] LOGIKA EKSTRAKSI INVOICE
+                if inv_file:
+                    with pdfplumber.open(inv_file) as pdf:
+                        text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                    
+                    lines = text.split('\n')
+                    current_item = {}
+                    price_pattern = re.compile(r'^(\d+)\s+([\d\.]+)\s+([\d\.]+)$')
+                    
+                    for i, line in enumerate(lines):
+                        line = line.strip()
+                        if "Prosind Code -" in line:
+                            current_item['KODE BARANG'] = line.split("-")[-1].strip()
+                            prev_line = lines[i-1].strip()
+                            match_desc_qty = re.match(r'^(.*?)\s+(\d+)$', prev_line)
+                            if match_desc_qty:
+                                current_item['URAIAN'] = match_desc_qty.group(1).strip().upper()
+                                current_item['JUMLAH SATUAN'] = int(match_desc_qty.group(2))
+                            else:
+                                current_item['URAIAN'] = prev_line.upper()
+                        elif "Net weight ea." in line:
+                            weight_match = re.search(r'([\d\.]+)\s*kg', line)
+                            if weight_match:
+                                current_item['NETTO'] = float(weight_match.group(1))
+                        elif "HS Code" in line:
+                            hs_match = re.search(r'HS Code\s+([\d\.]+)', line)
+                            if hs_match:
+                                current_item['HS'] = hs_match.group(1).replace(".", "")
+                        else:
+                            price_match = price_pattern.match(line)
+                            if price_match and 'KODE BARANG' in current_item:
+                                current_item['SERI BARANG'] = int(price_match.group(1))
+                                current_item['HARGA SATUAN'] = float(price_match.group(2))
+                                current_item['NILAI BARANG'] = current_item['HARGA SATUAN']
+                                
+                                # Data default template BARANG
+                                current_item['MEREK'] = "PROSIND CONSULTING"
+                                current_item['KODE KEMASAN'] = "BX"
+                                current_item['METODE PENENTUAN NILAI'] = "Metode 1"
+                                
+                                items_data.append(current_item)
+                                current_item = {}
 
-Berikut adalah beberapa hal yang sudah berjalan sangat baik dalam *script* Anda:
+                # [B] TEMPAT UNTUK LOGIKA PL, HBL, MBL, BC 1.1
+                # (Akan diisi nanti setelah format PDF diketahui)
+                
+                # --- 5. PEMBUATAN FILE EXCEL MULTI-SHEET ---
+                # Membuat DataFrame untuk Sheet BARANG
+                if items_data:
+                    df_barang = pd.DataFrame(items_data)
+                else:
+                    df_barang = pd.DataFrame(columns=['SERI BARANG', 'KODE BARANG', 'URAIAN', 'NETTO', 'JUMLAH SATUAN', 'HARGA SATUAN'])
 
-*   **Antarmuka yang Profesional:** Penggunaan `st.set_page_config`, CSS kustom, dan pembagian kolom membuat aplikasi terlihat modern, bersih, dan mudah digunakan oleh *user*.
-*   **Logika Parsing Invoice:** Pola *regex* yang Anda buat sudah cukup spesifik untuk menangkap *Prosind Code*, berat bersih (*Net weight ea.*), *HS Code*, dan detail harga/kuantitas.
-*   **Kompilasi Multi-Sheet:** Penggunaan `pd.ExcelWriter` dengan parameter `engine='openpyxl'` dipadukan dengan `io.BytesIO()` adalah cara yang paling tepat dan efisien untuk men-generate file Excel berisi banyak sheet (`HEADER`, `DOKUMEN`, `BARANG`) yang siap diunduh langsung dari memori tanpa harus menyimpannya secara lokal di *server*.
+                # Membuat DataFrame untuk Sheet DOKUMEN 
+                df_dokumen = pd.DataFrame(columns=[
+                    'SERI DOKUMEN', 'KODE DOKUMEN', 'NOMOR DOKUMEN', 'TANGGAL DOKUMEN'
+                ])
+                
+                # Membuat DataFrame untuk Sheet HEADER
+                df_header = pd.DataFrame(columns=[
+                    'NOMOR PENGAJUAN', 'JALUR', 'KODE ASAL BARANG', 'NILAI INVOICE', 'ASURANSI', 'FREIGHT'
+                ])
 
-Seperti yang terlihat pada baris kode Anda di bagian **`[B]`**, saat ini area untuk logika ekstraksi Packing List (PL), House B/L (HBL), Master B/L (MBL), dan Manifest BC 1.1 masih kosong (*placeholder*).
-
-Apakah Anda ingin saya membantu membuatkan draf logika ekstraksi (*parsing* dengan `pdfplumber` dan *regex*) untuk dokumen-dokumen tambahan tersebut?
+                # Proses menyatukan Sheet ke dalam satu file Excel
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                    df_header.to_excel(writer, sheet_name='HEADER', index=False)
+                    df_dokumen.to_excel(writer, sheet_name='DOKUMEN', index=False)
+                    df_barang.to_excel(writer, sheet_name='BARANG', index=False)
+                
+                st.success("✅ Seluruh data berhasil diproses dan dikompilasi!")
+                
+                # Nama file hasil download disesuaikan
+                st.download_button(
+                    label="⬇️ Download Excel Hasil Ekstraksi (Format CEISA)",
+                    data=output.getvalue(),
+                    file_name="KODEX_PT_Setia_Samudera_Abadi.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True
+                )
+            except Exception as e:
+                st.error(f"Terjadi kesalahan teknis saat membaca struktur dokumen: {e}")
