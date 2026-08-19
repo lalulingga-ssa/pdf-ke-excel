@@ -16,12 +16,12 @@ st.markdown(
     """
     <style>
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1.5rem;
         padding-bottom: 2rem;
         max-width: 900px;
     }
     h1 { font-size: 1.8rem !important; }
-    h3 { font-size: 1.2rem !important; }
+    h3 { font-size: 1.1rem !important; }
     
     /* Styling tombol utama agar compact dan menarik */
     .stButton>button {
@@ -37,7 +37,7 @@ st.markdown(
         transition: 0.3s;
     }
     .stButton>button:hover { 
-        background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+        background: linear-gradient(135deg, #0369a1 100%, #075985 100%);
         color: white; 
     }
     </style>
@@ -54,7 +54,13 @@ with col_h2:
 
 st.markdown("---")
 
-# --- 3. INPUT NOMOR AJU & NDPBM (Berdampingan rapi) ---
+# --- 3. PILIHAN JENIS DOKUMEN & INPUT PARAMETER ---
+jenis_pemberitahuan = st.radio(
+    "📌 Pilih Jenis Dokumen Kepabeanan:",
+    ["PIB BC 2.0 (Impor)", "PEB BC 3.0 (Ekspor)"],
+    horizontal=True
+)
+
 col_in1, col_in2 = st.columns(2)
 with col_in1:
     nomor_aju = st.text_input(
@@ -70,7 +76,7 @@ with col_in2:
 
 st.info("ℹ️ Unggah dokumen Invoice dan Packing List di bawah ini untuk langsung dikompilasi ke format CEISA 4.0.")
 
-# --- 4. AREA UPLOAD DOKUMEN PENDUKUNG (2 Baris Seimbang, Tanpa Scroll) ---
+# --- 4. AREA UPLOAD DOKUMEN PENDUKUNG ---
 st.subheader("📥 Unggah Dokumen Pendukung")
 
 c1, c2, c3 = st.columns(3)
@@ -240,7 +246,9 @@ if generate_btn:
 
                 # [C] STRUKTUR MULTI-SHEET CEISA 4.0
                 
-                # Daftar 107 Kolom Sheet HEADER sesuai permintaan
+                # Tentukan Kode Dokumen berdasarkan pilihan (20 untuk PIB BC 2.0, 30 untuk PEB BC 3.0)
+                kode_dok_val = 20 if "PIB" in jenis_pemberitahuan else 30
+
                 header_cols = [
                     'NOMOR AJU', 'KODE DOKUMEN', 'KODE KANTOR', 'KODE KANTOR BONGKAR', 'KODE KANTOR PERIKSA', 
                     'KODE KANTOR TUJUAN', 'KODE KANTOR EKSPOR', 'KODE JENIS IMPOR', 'KODE JENIS EKSPOR', 'KODE JENIS TPB', 
@@ -266,11 +274,10 @@ if generate_btn:
                     'KODE JENIS PENGANGKUTAN', 'FLAG PROPORSIONAL NETTO'
                 ]
                 
-                # Membuat DataFrame HEADER dengan menduplikasi kolom jika diperlukan oleh pandas/openpyxl
                 df_header = pd.DataFrame(columns=header_cols)
                 if not df_header.empty:
                     df_header.loc[0, 'NOMOR AJU'] = nomor_aju
-                    df_header.loc[0, 'KODE DOKUMEN'] = 20
+                    df_header.loc[0, 'KODE DOKUMEN'] = kode_dok_val
                     df_header.loc[0, 'KODE KANTOR'] = 50100
                     df_header.loc[0, 'NDPBM'] = ndpbm_input
 
@@ -345,10 +352,10 @@ if generate_btn:
                     df_versi.to_excel(writer, sheet_name="VERSI", index=False)
                     df_respon.to_excel(writer, sheet_name="RESPON", index=False)
 
-                st.success(f"✅ File Excel CEISA 4.0 untuk Nomor Aju {nomor_aju} berhasil di-generate!")
+                st.success(f"✅ File Excel {jenis_pemberitahuan} untuk Nomor Aju {nomor_aju} berhasil di-generate!")
 
                 st.download_button(
-                    label="⬇️ Download Excel Format CEISA 4.0",
+                    label=f"⬇️ Download Excel Format {jenis_pemberitahuan}",
                     data=output.getvalue(),
                     file_name=f"{nomor_aju}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
