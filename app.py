@@ -5,7 +5,8 @@ import re
 import io
 
 # --- 1. PENGATURAN TAMPILAN UTAMA ---
-st.set_page_config(page_title="OptiCEISA DataForge", page_icon="🚢", layout="wide")
+# Mengubah judul di tab browser
+st.set_page_config(page_title="KODEX - PT. Setia Samudera Abadi", page_icon="🚢", layout="wide")
 
 # CSS Kustom untuk tampilan yang elegan, bersih, dan profesional
 st.markdown("""
@@ -22,8 +23,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 2. HEADER APLIKASI ---
-st.title("OptiCEISA DataForge ⚡")
-st.markdown("### *Intelligent CEISA 4.0 Document Extractor & Integrator*")
+st.title("KODEX 🚢")
+st.markdown("### *Kompilator Dokumen Ekspor-Impor | PT. Setia Samudera Abadi*")
 st.write("Unggah dokumen kepabeanan Anda. Sistem akan mengekstrak informasi dari Invoice, Packing List, HBL, MBL, dan Manifest BC 1.1 untuk disatukan menjadi satu file Excel template CEISA 4.0.")
 st.markdown("---")
 
@@ -60,7 +61,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
             try:
                 items_data = []
                 
-                # [A] LOGIKA EKSTRAKSI INVOICE (Mempertahankan logika Proshind sebelumnya)
+                # [A] LOGIKA EKSTRAKSI INVOICE
                 if inv_file:
                     with pdfplumber.open(inv_file) as pdf:
                         text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
@@ -104,17 +105,16 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                                 current_item = {}
 
                 # [B] TEMPAT UNTUK LOGIKA PL, HBL, MBL, BC 1.1
-                # Catatan: Logika regex untuk file selain Invoice akan ditambahkan
-                # setelah format/struktur teks masing-masing PDF diketahui.
+                # (Akan diisi nanti setelah format PDF diketahui)
                 
                 # --- 5. PEMBUATAN FILE EXCEL MULTI-SHEET ---
-                # Membuat DataFrame untuk Sheet BARANG (Dari Invoice & PL)
+                # Membuat DataFrame untuk Sheet BARANG
                 if items_data:
                     df_barang = pd.DataFrame(items_data)
                 else:
                     df_barang = pd.DataFrame(columns=['SERI BARANG', 'KODE BARANG', 'URAIAN', 'NETTO', 'JUMLAH SATUAN', 'HARGA SATUAN'])
 
-                # Membuat DataFrame untuk Sheet DOKUMEN (Dari HBL, MBL, BC 1.1, Invoice, PL)
+                # Membuat DataFrame untuk Sheet DOKUMEN 
                 df_dokumen = pd.DataFrame(columns=[
                     'SERI DOKUMEN', 'KODE DOKUMEN', 'NOMOR DOKUMEN', 'TANGGAL DOKUMEN'
                 ])
@@ -133,10 +133,11 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                 
                 st.success("✅ Seluruh data berhasil diproses dan dikompilasi!")
                 
+                # Nama file hasil download disesuaikan
                 st.download_button(
                     label="⬇️ Download Excel Hasil Ekstraksi (Format CEISA)",
                     data=output.getvalue(),
-                    file_name="OptiCEISA_Data_Kompilasi.xlsx",
+                    file_name="KODEX_PT_Setia_Samudera_Abadi.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     use_container_width=True
                 )
