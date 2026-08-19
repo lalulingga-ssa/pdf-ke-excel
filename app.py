@@ -281,7 +281,14 @@ if generate_btn:
                     df_header.loc[0, 'KODE KANTOR'] = 50100
                     df_header.loc[0, 'NDPBM'] = ndpbm_input
 
-                df_entitas = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE ENTITAS', 'KODE JENIS IDENTITAS', 'NOMOR IDENTITAS', 'NAMA ENTITAS'])
+                # --- UPDATE STRUKTUR SHEET ENTITAS ---
+                df_entitas = pd.DataFrame(columns=[
+                    'NOMOR AJU', 'SERI', 'KODE ENTITAS', 'KODE JENIS IDENTITAS', 'NOMOR IDENTITAS', 
+                    'NAMA ENTITAS', 'ALAMAT ENTITAS', 'NIB ENTITAS', 'KODE JENIS API', 'KODE STATUS', 
+                    'NOMOR IJIN ENTITAS', 'TANGGAL IJIN ENTITAS', 'KODE NEGARA', 'NIPER ENTITAS', 
+                    'KODE KATEGORI KONSOLIDATOR', 'KODE AFILIASI'
+                ])
+                
                 df_dokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE DOKUMEN', 'NOMOR DOKUMEN', 'TANGGAL DOKUMEN', 'KODE FASILITAS', 'KODE IJIN'])
                 df_pengangkut = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE CARA ANGKUT', 'NAMA PENGANGKUT', 'NOMOR PENGANGKUT', 'KODE BENDERA'])
                 df_kemasan = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE KEMASAN', 'JUMLAH KEMASAN', 'MEREK', 'NOMOR SEGEL'])
