@@ -6,73 +6,159 @@ import streamlit as st
 
 # --- 1. PENGATURAN TAMPILAN UTAMA ---
 st.set_page_config(
-    page_title="KODEX - PT. Setia Samudera Abadi", page_icon="🚢", layout="wide"
+    page_title="KODEX - Kompilator Dokumen Ekspor-Impor", page_icon="🚢", layout="wide"
 )
 
-# CSS Kustom untuk tampilan yang elegan, bersih, dan profesional
+# CSS Kustom untuk menyamakan tampilan dashboard persis seperti desain referensi
 st.markdown(
     """
     <style>
-    .main { background-color: #f4f6f9; }
-    h1 { color: #0a3d62; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 800; }
-    h3 { color: #3c6382; }
-    .stButton>button {
-        background-color: #0a3d62; color: white; border-radius: 6px;
-        padding: 0.6rem 1rem; border: none; transition: 0.3s; font-weight: bold;
+    .main { background-color: #f8fafc; }
+    h1 { color: #0f172a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 800; }
+    
+    /* Styling container kartu */
+    .dashboard-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .stButton>button:hover { background-color: #38ada9; color: white; border: none; }
+    
+    /* Tombol utama */
+    .stButton>button {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: white; 
+        border-radius: 8px;
+        padding: 0.75rem 1rem; 
+        border: none; 
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);
+        transition: 0.3s;
+    }
+    .stButton>button:hover { 
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+        color: white; 
+    }
+    
+    /* Styling teks info */
+    .footer-text {
+        text-align: center;
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 40px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 20px;
+    }
     </style>
 """,
     unsafe_allow_html=True,
 )
 
-# --- 2. HEADER APLIKASI & INPUT PARAMETER UTAMA ---
-st.title("KODEX 🚢")
-st.markdown("### *Kompilator Dokumen Ekspor-Impor | PT. Setia Samudera Abadi*")
+# --- 2. HEADER APLIKASI ---
+col_head1, col_head2 = st.columns([6, 1])
+with col_head1:
+    st.markdown("## **KODEX** 🚢 &nbsp;&nbsp; <span style='font-size: 18px; color: #334155; font-weight: 600;'>Kompilator Dokumen Ekspor-Impor</span>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #64748b; font-size: 14px;'>PT. Setia Samudera Abadi</span>", unsafe_allow_html=True)
+with col_head2:
+    st.markdown("<div style='text-align: right; padding-top: 10px;'><a href='#' style='text-decoration: none; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 8px; color: #334155; font-size: 13px;'>📖 Panduan</a></div>", unsafe_allow_html=True)
 
-# Kolom input untuk Nomor Aju dan NDPBM
-col_input1, col_input2 = st.columns(2)
-with col_input1:
-    nomor_aju = st.text_input(
-        "🔢 Masukkan Nomor Aju", 
-        placeholder="Contoh: 000020PRO32520260818000114"
-    )
-with col_input2:
-    ndpbm_input = st.number_input(
-        "💱 Masukkan Nilai NDPBM", 
-        value=12644.5, 
-        format="%.4f"
-    )
+st.markdown("<br>", unsafe_allow_html=True)
 
-st.write(
-    "Unggah dokumen Invoice dan Packing List. Sistem akan mengekstrak informasi dan menyusunnya"
-    " secara presisi ke dalam sheet BARANG dan multi-sheet CEISA 4.0 lainnya."
-)
-st.markdown("---")
+# --- 3. CONTAINER INPUT NOMOR AJU & NDPBM ---
+with st.container():
+    st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+    
+    col_in1, col_in2 = st.columns(2)
+    with col_in1:
+        st.markdown("🔢 **Masukkan Nomor Aju**")
+        nomor_aju = st.text_input(
+            "Nomor Aju",
+            placeholder="Contoh: 000020PRO32520260818000114",
+            label_visibility="collapsed"
+        )
+        st.markdown("<span style='color: #94a3b8; font-size: 12px;'>Contoh: 000020PRO32520260818000114</span>", unsafe_allow_html=True)
+        
+    with col_in2:
+        st.markdown("💱 **Masukkan Nilai NDPBM**")
+        ndpbm_input = st.number_input(
+            "Nilai NDPBM",
+            value=12644.5000,
+            format="%.4f",
+            label_visibility="collapsed"
+        )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.info("ℹ️ Unggah dokumen Invoice dan Packing List. Sistem akan mengekstrak informasi dan menyusunnya secara presisi ke dalam sheet BARANG dan multi-sheet CEISA 4.0 lainnya.")
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# --- 3. AREA UPLOAD ---
-st.subheader("📥 Unggah Dokumen Pendukung")
+# --- 4. AREA UPLOAD DOKUMEN PENDUKUNG ---
+st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+st.markdown("### 📥 Unggah Dokumen Pendukung")
+st.markdown("<span style='color: #64748b; font-size: 14px;'>Format file yang didukung: PDF (Maksimal 200MB per file)</span>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    inv_file = st.file_uploader("1. Invoice (PDF)", type="pdf")
-with col2:
-    pl_file = st.file_uploader("2. Packing List (PDF)", type="pdf")
-with col3:
-    hbl_file = st.file_uploader("3. House B/L (PDF)", type="pdf")
+# Menggunakan 6 kolom untuk meniru tata letak kartu dokumen
+d_col1, d_col2, d_col3, d_col4, d_col5, d_col6 = st.columns(6)
 
-col4, col5, col6 = st.columns(3)
-with col4:
-    mbl_file = st.file_uploader("4. Master B/L (PDF)", type="pdf")
-with col5:
-    bc_file = st.file_uploader("5. Manifest BC 1.1 (PDF)", type="pdf")
-with col6:
-    st.info("💡 Pastikan dokumen dalam format final dan tidak dienkripsi.")
+with d_col1:
+    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>1. Invoice (PDF)</p>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
+    inv_file = st.file_uploader("Invoice", type="pdf", label_visibility="collapsed", key="inv")
+    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("---")
+with d_col2:
+    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>2. Packing List</p>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
+    pl_file = st.file_uploader("Packing List", type="pdf", label_visibility="collapsed", key="pl")
+    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# --- 4. TOMBOL PROSES & LOGIKA EKSTRAKSI ---
-if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
+with d_col3:
+    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>3. House B/L</p>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
+    hbl_file = st.file_uploader("House B/L", type="pdf", label_visibility="collapsed", key="hbl")
+    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with d_col4:
+    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>4. Master B/L</p>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
+    mbl_file = st.file_uploader("Master B/L", type="pdf", label_visibility="collapsed", key="mbl")
+    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with d_col5:
+    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>5. Manifest BC</p>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
+    bc_file = st.file_uploader("Manifest BC", type="pdf", label_visibility="collapsed", key="bc")
+    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with d_col6:
+    st.markdown("<div style='border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; background: #f8fafc; height: 100%; display: flex; flex-direction: column; justify-content: center;'>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 28px;'>💡</div>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 12px; color: #0284c7; font-weight: 500; margin-top: 8px;'>Pastikan dokumen dalam format final dan tidak dienkripsi.</p>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Tombol Proses Full Width
+generate_btn = st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# --- 5. LOGIKA EKSTRAKSI & PROSES GENERATE EXCEL ---
+if generate_btn:
     if not inv_file:
         st.warning("⚠️ Mohon unggah dokumen Invoice terlebih dahulu untuk mengisi Sheet Barang.")
     elif not nomor_aju:
@@ -98,7 +184,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                             p_text = page.extract_text()
                             if p_text:
                                 pl_text += p_text + "\n"
-                    # Mencari seluruh keterangan Net weight ea. di packing list
                     netto_matches = re.findall(r"Net weight ea\.?\s*([\d\.]+)\s*kg", pl_text, re.IGNORECASE)
                     if not netto_matches:
                         netto_matches = re.findall(r"Net weight\s*([\d\.]+)\s*kg", pl_text, re.IGNORECASE)
@@ -108,7 +193,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                 lines = inv_text.split("\n")
                 current_item = {}
                 seri_counter = 1
-                item_index = 0
 
                 for i, line in enumerate(lines):
                     line = line.strip()
@@ -116,7 +200,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         if current_item:
                             items_data.append(current_item)
                             current_item = {}
-                            item_index += 1
 
                         current_item["NOMOR AJU"] = nomor_aju
                         current_item["SERI BARANG"] = seri_counter
@@ -124,7 +207,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         
                         current_item["KODE BARANG"] = line.split("-")[-1].strip()
                         
-                        # Ambil Uraian dan Jumlah Satuan (QTY) dari baris sebelumnya
                         if i > 0:
                             prev_line = lines[i - 1].strip()
                             match_desc_qty = re.match(r"^(.*?)\s+(\d+)$", prev_line)
@@ -140,8 +222,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         if hs_match and current_item:
                             current_item["HS"] = hs_match.group(1).replace(".", "")
                         
-                        # Harga satuan dan CIF dari baris yang mengandung HS Code / pola harga
-                        # Format contoh: 1   1706.00   6824.00 (SERI, HARGA SATUAN, HS TOTAL CURR)
                         price_hs_match = re.search(r"(\d+)\s+([\d\.]+)\s+([\d\.]+)$", line)
                         if price_hs_match and current_item:
                             current_item["HARGA SATUAN"] = float(price_hs_match.group(2))
@@ -149,13 +229,11 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                             current_item["CIF"] = cif_val
                             current_item["FOB"] = cif_val
 
-                # Ambil tambahan baris harga jika polanya terpisah di baris berikutnya
                 for i, line in enumerate(lines):
                     line = line.strip()
                     price_pattern = re.compile(r"^(\d+)\s+([\d\.]+)\s+([\d\.]+)$")
                     price_match = price_pattern.match(line)
                     if price_match and len(items_data) > 0:
-                        # Cocokkan dengan item berdasarkan nomor seri
                         seri_num = int(price_match.group(1))
                         for item in items_data:
                             if item.get("SERI BARANG") == seri_num:
@@ -167,9 +245,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                 if current_item:
                     items_data.append(current_item)
 
-                # Masukkan nilai Netto dari Packing List dan nilai-nilai default ke setiap item barang
                 for idx, item in enumerate(items_data):
-                    # Ambil netto berdasarkan urutan item, atau default 0 jika tidak ketemu
                     if idx < len(netto_values):
                         item["NETTO"] = netto_values[idx]
                     else:
@@ -179,11 +255,10 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                     item["TIPE"] = "TANPA TIPE"
                     item["UKURAN"] = "-"
                     item["SPESIFIKASI LAIN"] = "-"
-                    item["KODE SATUAN"] = "PCE" # Default satuan jika tidak terekstrak
+                    item["KODE SATUAN"] = "PCE"
                     item["KODE KEMASAN"] = "BX"
                     item["JUMLAH KEMASAN"] = 1
                     
-                    # Jika CIF belum terisi dari parsing, beri nilai default 0
                     if "CIF" not in item:
                         item["CIF"] = 0.0
                         item["FOB"] = 0.0
@@ -265,7 +340,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                 df_versi = pd.DataFrame({'VERSI': [1.3]})
                 df_respon = pd.DataFrame(columns=['NOMOR AJU', 'KODE RESPON', 'NOMOR RESPON', 'TANGGAL RESPON'])
 
-                # --- 5. MENULIS KE FILE EXCEL MULTI-SHEET ---
+                # --- 6. MENULIS KE FILE EXCEL MULTI-SHEET ---
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine="openpyxl") as writer:
                     df_header.to_excel(writer, sheet_name="HEADER", index=False)
@@ -301,3 +376,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                 )
             except Exception as e:
                 st.error(f"Terjadi kesalahan teknis saat memproses dokumen: {e}")
+
+# --- 7. FOOTER ---
+st.markdown("<div class='footer-text'>© 2026 PT. Setia Samudera Abadi. All rights reserved. &nbsp;&nbsp;|&nbsp;&nbsp; v1.0.0</div>", unsafe_allow_html=True)
