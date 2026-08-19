@@ -129,7 +129,7 @@ if generate_btn:
                         netto_matches = re.findall(r"Net weight\s*([\d\.]+)\s*kg", pl_text, re.IGNORECASE)
                     netto_values = [float(w) for w in netto_matches]
 
-                # Ekstraksi baris dari Invoice dengan fokus pada Deskripsi (Uraian) dan Prosind Code
+                # Ekstraksi baris dari Invoice berdasarkan penanda "Prosind Code"
                 lines = inv_text.split("\n")
                 current_item = {}
                 seri_counter = 1
@@ -146,20 +146,23 @@ if generate_btn:
                         current_item["SERI BARANG"] = seri_counter
                         seri_counter += 1
                         
-                        # Ekstraksi kode barang (Prosind Code)
+                        # Ambil Kode Barang (6 digit angka)
                         code_match = re.search(r"(\d{6})", line_clean)
                         if code_match:
                             current_item["KODE BARANG"] = code_match.group(1)
                         else:
                             current_item["KODE BARANG"] = line_clean.split("-")[-1].strip()
                         
-                        # Ambil Uraian (Description) secara bersih dari baris sebelumnya
+                        # Ambil Uraian & QTY dari baris persis sebelumnya (contoh: "1Main bearing set - undersized")
                         if i > 0:
-                            raw_desc = lines[i - 1].strip()
-                            # Bersihkan nomor urut di awal baris jika ada (misal: "1Main bearing" -> "Main bearing")
-                            clean_desc = re.sub(r"^\d+\s*", "", raw_desc)
-                            current_item["URAIAN"] = clean_desc.strip().upper()
-                            current_item["JUMLAH SATUAN"] = 1  # Default QTY
+                            raw_prev = lines[i - 1].strip()
+                            desc_match = re.match(r"^(\d+)(.*)$", raw_prev)
+                            if desc_match:
+                                current_item["JUMLAH SATUAN"] = int(desc_match.group(1))
+                                current_item["URAIAN"] = desc_match.group(2).strip().upper()
+                            else:
+                                current_item["JUMLAH SATUAN"] = 1
+                                current_item["URAIAN"] = raw_prev.upper()
 
                     elif "HS Code" in line_clean or "HS" in line_clean:
                         hs_match = re.search(r"(?:HS Code|HS)\s*[:\-]?\s*([\d\.]+)", line_clean, re.IGNORECASE)
@@ -173,6 +176,7 @@ if generate_btn:
                             current_item["CIF"] = cif_val
                             current_item["FOB"] = cif_val
 
+                # Tangkap harga/CIF dari baris format reguler
                 for i, line in enumerate(lines):
                     line_clean = line.strip()
                     price_pattern = re.compile(r"^(\d+)\s+([\d\.]+)\s+([\d\.]+)$")
