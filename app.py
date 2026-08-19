@@ -300,7 +300,7 @@ if generate_btn:
                 df_kemasan = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE KEMASAN', 'JUMLAH KEMASAN', 'MEREK', 'NOMOR SEGEL'])
                 df_kontainer = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'NOMOR KONTINER', 'KODE UKURAN KONTAINER', 'KODE JENIS KONTAINER', 'KODE TIPE KONTAINER', 'NOMOR SEGEL'])
                 
-                # --- UPDATE STRUKTUR SHEET KOMPONENBIAYA ---
+                # Sheet Komponen Biaya
                 df_komponenbiaya = pd.DataFrame(columns=[
                     'NOMOR AJU', 'JENIS NILAI', 'HARGA INVOICE', 'PEMBAYARAN TIDAK LANGSUNG', 'DISKON',
                     'KOMISI PENJUALAN', 'BIAYA PENGEMASAN', 'BIAYA PENGEPAKAN', 'ASSIST', 'ROYALTI',
@@ -334,7 +334,15 @@ if generate_btn:
                 else:
                     df_barang = pd.DataFrame(columns=barang_columns)
 
-                df_barangtarif = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 'KODE FASILITAS'])
+                # --- UPDATE STRUKTUR SHEET BARANGTARIF ---
+                df_barangtarif = pd.DataFrame(columns=[
+                    'NOMOR AJU', 'SERI BARANG', 'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 
+                    'KODE FASILITAS', 'TARIF FASILITAS', 'NILAI BAYAR', 'NILAI FASILITAS', 
+                    'NILAI SUDAH DILUNASI', 'KODE SATUAN', 'JUMLAH SATUAN', 'FLAG BMT SEMENTARA', 
+                    'KODE KOMODITI CUKAI', 'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 
+                    'KODE KEMASAN', 'JUMLAH KEMASAN'
+                ])
+                
                 df_barangdokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI DOKUMEN', 'SERI IZIN'])
                 df_barangentitas = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI ENTITAS'])
                 df_barangspekkhusus = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'KODE', 'URAIAN'])
