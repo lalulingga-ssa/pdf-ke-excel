@@ -101,7 +101,7 @@ if generate_btn:
     elif not nomor_aju:
         st.warning("⚠️ Mohon isi Nomor Aju terlebih dahulu.")
     else:
-        with st.spinner("Mengekstrak data PDF dan menyusun Sheet BARANG..."):
+        with st.spinner("Mengekstrak data PDF dan menyusun Sheet BARANG & HEADER..."):
             try:
                 items_data = []
                 merek_perusahaan = "PROSIND CONSULTING & ENGINEERING PTY.LTD."
@@ -239,14 +239,40 @@ if generate_btn:
                     item["STATEMENT PERBEDAAN HARGA"] = "T"
 
                 # [C] STRUKTUR MULTI-SHEET CEISA 4.0
-                df_header = pd.DataFrame(columns=[
+                
+                # Daftar 107 Kolom Sheet HEADER sesuai permintaan
+                header_cols = [
                     'NOMOR AJU', 'KODE DOKUMEN', 'KODE KANTOR', 'KODE KANTOR BONGKAR', 'KODE KANTOR PERIKSA', 
-                    'KODE KANTOR TUJUAN', 'KODE KANTOR EKSPOR', 'KODE JENIS IMPOR', 'KODE JENIS EKSPOR', 'KODE JENIS TPB'
-                ])
+                    'KODE KANTOR TUJUAN', 'KODE KANTOR EKSPOR', 'KODE JENIS IMPOR', 'KODE JENIS EKSPOR', 'KODE JENIS TPB', 
+                    'KODE JENIS PLB', 'KODE JENIS PROSEDUR', 'KODE TUJUAN PEMASUKAN', 'KODE TUJUAN PENGIRIMAN', 'KODE TUJUAN TPB', 
+                    'KODE CARA DAGANG', 'KODE CARA BAYAR', 'KODE CARA BAYAR LAINNYA', 'KODE GUDANG ASAL', 'KODE GUDANG TUJUAN', 
+                    'KODE JENIS KIRIM', 'KODE JENIS PENGIRIMAN', 'KODE KATEGORI EKSPOR', 'KODE KATEGORI MASUK FTZ', 'KODE KATEGORI KELUAR FTZ', 
+                    'KODE KATEGORI BARANG FTZ', 'KODE LOKASI', 'KODE LOKASI BAYAR', 'LOKASI ASAL', 'LOKASI TUJUAN', 
+                    'KODE DAERAH ASAL', 'KODE GUDANG ASAL', 'KODE GUDANG TUJUAN', 'KODE NEGARA TUJUAN', 'KODE TUTUP PU', 
+                    'NOMOR BC11', 'TANGGAL BC11', 'NOMOR POS', 'NOMOR SUB POS', 'KODE PELABUHAN BONGKAR', 
+                    'KODE PELABUHAN MUAT', 'KODE PELABUHAN MUAT AKHIR', 'KODE PELABUHAN TRANSIT', 'KODE PELABUHAN TUJUAN', 'KODE PELABUHAN EKSPOR', 
+                    'KODE TPS', 'TANGGAL BERANGKAT', 'TANGGAL EKSPOR', 'TANGGAL MASUK', 'TANGGAL MUAT', 
+                    'TANGGAL TIBA', 'TANGGAL PERIKSA', 'TEMPAT STUFFING', 'TANGGAL STUFFING', 'KODE TANDA PENGAMAN', 
+                    'JUMLAH TANDA PENGAMAN', 'FLAG CURAH', 'FLAG SDA', 'FLAG VD', 'FLAG AP BK', 
+                    'FLAG MIGAS', 'KODE ASURANSI', 'ASURANSI', 'NILAI BARANG', 'NILAI INCOTERM', 
+                    'NILAI MAKLON', 'ASURANSI', 'FREIGHT', 'FOB', 'BIAYA TAMBAHAN', 
+                    'BIAYA PENGURANG', 'VD', 'CIF', 'HARGA_PENYERAHAN', 'NDPBM', 
+                    'TOTAL DANA SAWIT', 'DASAR PENGENAAN PAJAK', 'NILAI JASA', 'UANG MUKA', 'BRUTO', 
+                    'NETTO', 'VOLUME', 'KOTA PERNYATAAN', 'TANGGAL PERNYATAAN', 'NAMA PERNYATAAN', 
+                    'JABATAN PERNYATAAN', 'KODE VALUTA', 'KODE INCOTERM', 'KODE JASA KENA PAJAK', 'NOMOR BUKTI BAYAR', 
+                    'TANGGAL BUKTI BAYAR', 'KODE JENIS NILAI', 'KODE KANTOR MUAT', 'NOMOR DAFTAR', 'TANGGAL DAFTAR', 
+                    'KODE ASAL BARANG FTZ', 'KODE TUJUAN PENGELUARAN', 'PPN PAJAK', 'PPNBM PAJAK', 'TARIF PPN PAJAK', 
+                    'TARIF PPNBM PAJAK', 'BARANG TIDAK BERWUJUD', 'KODE JENIS PENGELUARAN', 'BARANG KIRIMAN', 'FLAG KONSOL', 
+                    'KODE JENIS PENGANGKUTAN', 'FLAG PROPORSIONAL NETTO'
+                ]
+                
+                # Membuat DataFrame HEADER dengan menduplikasi kolom jika diperlukan oleh pandas/openpyxl
+                df_header = pd.DataFrame(columns=header_cols)
                 if not df_header.empty:
                     df_header.loc[0, 'NOMOR AJU'] = nomor_aju
                     df_header.loc[0, 'KODE DOKUMEN'] = 20
                     df_header.loc[0, 'KODE KANTOR'] = 50100
+                    df_header.loc[0, 'NDPBM'] = ndpbm_input
 
                 df_entitas = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE ENTITAS', 'KODE JENIS IDENTITAS', 'NOMOR IDENTITAS', 'NAMA ENTITAS'])
                 df_dokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE DOKUMEN', 'NOMOR DOKUMEN', 'TANGGAL DOKUMEN', 'KODE FASILITAS', 'KODE IJIN'])
