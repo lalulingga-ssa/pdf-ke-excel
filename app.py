@@ -334,7 +334,7 @@ if generate_btn:
                 else:
                     df_barang = pd.DataFrame(columns=barang_columns)
 
-                # --- UPDATE STRUKTUR SHEET BARANGTARIF ---
+                # Sheet Barang Tarif
                 df_barangtarif = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI BARANG', 'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 
                     'KODE FASILITAS', 'TARIF FASILITAS', 'NILAI BAYAR', 'NILAI FASILITAS', 
@@ -346,7 +346,13 @@ if generate_btn:
                 df_barangdokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI DOKUMEN', 'SERI IZIN'])
                 df_barangentitas = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI ENTITAS'])
                 df_barangspekkhusus = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'KODE', 'URAIAN'])
-                df_barangvd = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'KODE VD', 'NILAI BARANG'])
+                
+                # --- UPDATE STRUKTUR SHEET BARANGVD ---
+                df_barangvd = pd.DataFrame(columns=[
+                    'NOMOR AJU', 'SERI BARANG', 'KODE VD', 'NILAI BARANG', 
+                    'BIAYA TAMBAHAN', 'BIAYA PENGURANG', 'JATUH TEMPO'
+                ])
+                
                 df_bahanbaku = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'HS', 'KODE BARANG', 'URAIAN'])
                 df_bahanbakutarif = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE PUNGUTAN'])
                 df_bahanbakudokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'SERI DOKUMEN'])
