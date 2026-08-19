@@ -6,165 +6,104 @@ import streamlit as st
 
 # --- 1. PENGATURAN TAMPILAN UTAMA ---
 st.set_page_config(
-    page_title="KODEX - Kompilator Dokumen Ekspor-Impor", page_icon="🚢", layout="wide"
+    page_title="KODEX - Kompilator Dokumen Ekspor-Impor", 
+    page_icon="🚢", 
+    layout="centered"
 )
 
-# CSS Kustom untuk menyamakan tampilan dashboard persis seperti desain referensi
+# CSS Kustom untuk tampilan yang bersih, rapi, dan pas satu layar (Compact Layout)
 st.markdown(
     """
     <style>
-    .main { background-color: #f8fafc; }
-    h1 { color: #0f172a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 800; }
-    
-    /* Styling container kartu */
-    .dashboard-card {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 900px;
     }
+    h1 { font-size: 1.8rem !important; }
+    h3 { font-size: 1.2rem !important; }
     
-    /* Tombol utama */
+    /* Styling tombol utama agar compact dan menarik */
     .stButton>button {
         background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
         color: white; 
-        border-radius: 8px;
-        padding: 0.75rem 1rem; 
+        border-radius: 6px;
+        padding: 0.5rem 1rem; 
         border: none; 
         font-weight: bold;
-        font-size: 16px;
-        box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);
+        font-size: 15px;
+        width: 100%;
+        box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
         transition: 0.3s;
     }
     .stButton>button:hover { 
         background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
         color: white; 
     }
-    
-    /* Styling teks info */
-    .footer-text {
-        text-align: center;
-        color: #64748b;
-        font-size: 13px;
-        margin-top: 40px;
-        border-top: 1px solid #e2e8f0;
-        padding-top: 20px;
-    }
     </style>
 """,
     unsafe_allow_html=True,
 )
 
-# --- 2. HEADER APLIKASI ---
-col_head1, col_head2 = st.columns([6, 1])
-with col_head1:
-    st.markdown("## **KODEX** 🚢 &nbsp;&nbsp; <span style='font-size: 18px; color: #334155; font-weight: 600;'>Kompilator Dokumen Ekspor-Impor</span>", unsafe_allow_html=True)
-    st.markdown("<span style='color: #64748b; font-size: 14px;'>PT. Setia Samudera Abadi</span>", unsafe_allow_html=True)
-with col_head2:
-    st.markdown("<div style='text-align: right; padding-top: 10px;'><a href='#' style='text-decoration: none; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 8px; color: #334155; font-size: 13px;'>📖 Panduan</a></div>", unsafe_allow_html=True)
+# --- 2. HEADER APLIKASI (Compact Header) ---
+col_h1, col_h2 = st.columns([5, 1])
+with col_h1:
+    st.markdown("## **KODEX** 🚢 &nbsp; <span style='font-size: 15px; opacity: 0.7;'>Kompilator Dokumen Ekspor-Impor | PT. Setia Samudera Abadi</span>", unsafe_allow_html=True)
+with col_h2:
+    st.markdown("<div style='text-align: right; padding-top: 5px;'><a href='#' style='text-decoration: none; font-size: 13px;'>📖 Panduan</a></div>", unsafe_allow_html=True)
+
+st.markdown("---")
+
+# --- 3. INPUT NOMOR AJU & NDPBM (Berdampingan rapi) ---
+col_in1, col_in2 = st.columns(2)
+with col_in1:
+    nomor_aju = st.text_input(
+        "🔢 Masukkan Nomor Aju", 
+        placeholder="Contoh: 000020PRO32520260818000114"
+    )
+with col_in2:
+    ndpbm_input = st.number_input(
+        "💱 Masukkan Nilai NDPBM", 
+        value=12644.5000, 
+        format="%.4f"
+    )
+
+st.info("ℹ️ Unggah dokumen Invoice dan Packing List di bawah ini untuk langsung dikompilasi ke format CEISA 4.0.")
+
+# --- 4. AREA UPLOAD DOKUMEN PENDUKUNG (2 Baris Seimbang, Tanpa Scroll) ---
+st.subheader("📥 Unggah Dokumen Pendukung")
+
+# Baris Pertama (3 Kolom utama: Invoice, Packing List, House B/L)
+c1, c2, c3 = st.columns(3)
+with c1:
+    inv_file = st.file_uploader("1. Invoice (PDF)", type="pdf", key="inv")
+with c2:
+    pl_file = st.file_uploader("2. Packing List (PDF)", type="pdf", key="pl")
+with c3:
+    hbl_file = st.file_uploader("3. House B/L (PDF)", type="pdf", key="hbl")
+
+# Baris Kedua (2 Kolom dokumen + 1 Kolom Catatan agar simetris)
+c4, c5, c6 = st.columns(3)
+with c4:
+    mbl_file = st.file_uploader("4. Master B/L (PDF)", type="pdf", key="mbl")
+with c5:
+    bc_file = st.file_uploader("5. Manifest BC 1.1 (PDF)", type="pdf", key="bc")
+with c6:
+    st.markdown("<div style='padding-top: 28px; font-size: 12px; opacity: 0.8;'>💡 <b>Catatan:</b> Pastikan dokumen dalam format final dan tidak dienkripsi.</div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- 3. CONTAINER INPUT NOMOR AJU & NDPBM ---
-with st.container():
-    st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
-    
-    col_in1, col_in2 = st.columns(2)
-    with col_in1:
-        st.markdown("🔢 **Masukkan Nomor Aju**")
-        nomor_aju = st.text_input(
-            "Nomor Aju",
-            placeholder="Contoh: 000020PRO32520260818000114",
-            label_visibility="collapsed"
-        )
-        st.markdown("<span style='color: #94a3b8; font-size: 12px;'>Contoh: 000020PRO32520260818000114</span>", unsafe_allow_html=True)
-        
-    with col_in2:
-        st.markdown("💱 **Masukkan Nilai NDPBM**")
-        ndpbm_input = st.number_input(
-            "Nilai NDPBM",
-            value=12644.5000,
-            format="%.4f",
-            label_visibility="collapsed"
-        )
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.info("ℹ️ Unggah dokumen Invoice dan Packing List. Sistem akan mengekstrak informasi dan menyusunnya secara presisi ke dalam sheet BARANG dan multi-sheet CEISA 4.0 lainnya.")
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# --- 4. AREA UPLOAD DOKUMEN PENDUKUNG ---
-st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
-st.markdown("### 📥 Unggah Dokumen Pendukung")
-st.markdown("<span style='color: #64748b; font-size: 14px;'>Format file yang didukung: PDF (Maksimal 200MB per file)</span>", unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
-
-# Menggunakan 6 kolom untuk meniru tata letak kartu dokumen
-d_col1, d_col2, d_col3, d_col4, d_col5, d_col6 = st.columns(6)
-
-with d_col1:
-    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>1. Invoice (PDF)</p>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
-    inv_file = st.file_uploader("Invoice", type="pdf", label_visibility="collapsed", key="inv")
-    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with d_col2:
-    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>2. Packing List</p>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
-    pl_file = st.file_uploader("Packing List", type="pdf", label_visibility="collapsed", key="pl")
-    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with d_col3:
-    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>3. House B/L</p>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
-    hbl_file = st.file_uploader("House B/L", type="pdf", label_visibility="collapsed", key="hbl")
-    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with d_col4:
-    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>4. Master B/L</p>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
-    mbl_file = st.file_uploader("Master B/L", type="pdf", label_visibility="collapsed", key="mbl")
-    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with d_col5:
-    st.markdown("<div style='border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; background: #fafafa;'>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 13px; font-weight: 600; color: #1e293b;'>5. Manifest BC</p>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size: 36px;'>📄</div>", unsafe_allow_html=True)
-    bc_file = st.file_uploader("Manifest BC", type="pdf", label_visibility="collapsed", key="bc")
-    st.markdown("<span style='font-size: 11px; color: #94a3b8;'>200MB per file • PDF</span>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with d_col6:
-    st.markdown("<div style='border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; background: #f8fafc; height: 100%; display: flex; flex-direction: column; justify-content: center;'>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size: 28px;'>💡</div>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 12px; color: #0284c7; font-weight: 500; margin-top: 8px;'>Pastikan dokumen dalam format final dan tidak dienkripsi.</p>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# Tombol Proses Full Width
+# --- 5. TOMBOL PROSES ---
 generate_btn = st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True)
 
-st.markdown("</div>", unsafe_allow_html=True)
-
-# --- 5. LOGIKA EKSTRAKSI & PROSES GENERATE EXCEL ---
+# --- 6. LOGIKA EKSTRAKSI & GENERATE EXCEL ---
 if generate_btn:
     if not inv_file:
         st.warning("⚠️ Mohon unggah dokumen Invoice terlebih dahulu untuk mengisi Sheet Barang.")
     elif not nomor_aju:
         st.warning("⚠️ Mohon isi Nomor Aju terlebih dahulu.")
     else:
-        with st.spinner("Mengekstrak data PDF (Invoice & Packing List) dan menyusun Sheet BARANG..."):
+        with st.spinner("Mengekstrak data PDF dan menyusun Sheet BARANG..."):
             try:
                 items_data = []
                 merek_perusahaan = "PROSIND CONSULTING & ENGINEERING PTY.LTD."
@@ -283,7 +222,7 @@ if generate_btn:
                     item["METODE PENENTUAN NILAI"] = "Metode 1"
                     item["STATEMENT PERBEDAAN HARGA"] = "T"
 
-                # [C] DEFINISI STRUKTUR 21 MULTI-SHEET CEISA 4.0
+                # [C] STRUKTUR MULTI-SHEET CEISA 4.0
                 df_header = pd.DataFrame(columns=[
                     'NOMOR AJU', 'KODE DOKUMEN', 'KODE KANTOR', 'KODE KANTOR BONGKAR', 'KODE KANTOR PERIKSA', 
                     'KODE KANTOR TUJUAN', 'KODE KANTOR EKSPOR', 'KODE JENIS IMPOR', 'KODE JENIS EKSPOR', 'KODE JENIS TPB'
@@ -340,7 +279,6 @@ if generate_btn:
                 df_versi = pd.DataFrame({'VERSI': [1.3]})
                 df_respon = pd.DataFrame(columns=['NOMOR AJU', 'KODE RESPON', 'NOMOR RESPON', 'TANGGAL RESPON'])
 
-                # --- 6. MENULIS KE FILE EXCEL MULTI-SHEET ---
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine="openpyxl") as writer:
                     df_header.to_excel(writer, sheet_name="HEADER", index=False)
@@ -377,5 +315,6 @@ if generate_btn:
             except Exception as e:
                 st.error(f"Terjadi kesalahan teknis saat memproses dokumen: {e}")
 
-# --- 7. FOOTER ---
-st.markdown("<div class='footer-text'>© 2026 PT. Setia Samudera Abadi. All rights reserved. &nbsp;&nbsp;|&nbsp;&nbsp; v1.0.0</div>", unsafe_allow_html=True)
+# --- 7. FOOTER MINIMALIS ---
+st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; font-size: 11px; opacity: 0.6;'>© 2026 PT. Setia Samudera Abadi &bull; v1.0.0</div>", unsafe_allow_html=True)
