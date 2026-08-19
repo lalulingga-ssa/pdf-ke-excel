@@ -26,15 +26,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- 2. HEADER APLIKASI & INPUT NOMOR AJU ---
+# --- 2. HEADER APLIKASI & INPUT PARAMETER UTAMA ---
 st.title("KODEX 🚢")
 st.markdown("### *Kompilator Dokumen Ekspor-Impor | PT. Setia Samudera Abadi*")
 
-# Kotak input Nomor Aju
-nomor_aju = st.text_input(
-    "🔢 Masukkan Nomor Aju", 
-    placeholder="Contoh: 000020PRO32520260818000114"
-)
+# Kolom input untuk Nomor Aju dan NDPBM
+col_input1, col_input2 = st.columns(2)
+with col_input1:
+    nomor_aju = st.text_input(
+        "🔢 Masukkan Nomor Aju", 
+        placeholder="Contoh: 000020PRO32520260818000114"
+    )
+with col_input2:
+    ndpbm_input = st.number_input(
+        "💱 Masukkan Nilai NDPBM", 
+        value=12644.5, 
+        format="%.4f"
+    )
 
 st.write(
     "Unggah dokumen kepabeanan Anda. Sistem akan mengekstrak informasi dan menyusunnya"
@@ -95,7 +103,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                 for i, line in enumerate(lines):
                     line = line.strip()
                     if "Prosind Code -" in line:
-                        # Jika ada item sebelumnya yang belum disimpan, masukkan ke list
                         if current_item:
                             items_data.append(current_item)
                             current_item = {}
@@ -106,7 +113,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         
                         current_item["KODE BARANG"] = line.split("-")[-1].strip()
                         
-                        # Ambil uraian dan jumlah satuan dari baris sebelumnya
                         if i > 0:
                             prev_line = lines[i - 1].strip()
                             match_desc_qty = re.match(r"^(.*?)\s+(\d+)$", prev_line)
@@ -132,7 +138,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                         if price_match and current_item:
                             current_item["HARGA SATUAN"] = float(price_match.group(2))
                             
-                            # Aturan nilai default & tetap sesuai permintaan
+                            # Memasukkan nilai default & dinamis dari input aplikasi
                             current_item["MEREK"] = merek_perusahaan
                             current_item["TIPE"] = "TANPA TIPE"
                             current_item["UKURAN"] = "-"
@@ -141,7 +147,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                             current_item["JUMLAH KEMASAN"] = 1
                             current_item["CIF"] = 6824
                             current_item["CIF RUPIAH"] = 89414570.19
-                            current_item["NDPBM"] = 12644.5
+                            current_item["NDPBM"] = ndpbm_input  # Mengambil nilai dari input halaman utama
                             current_item["FOB"] = 6824
                             current_item["ASURANSI"] = 0
                             current_item["FREIGHT"] = 247.42
@@ -159,7 +165,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                             current_item["METODE PENENTUAN NILAI"] = "Metode 1"
                             current_item["STATEMENT PERBEDAAN HARGA"] = "T"
 
-                # Masukkan item terakhir jika ada
                 if current_item:
                     items_data.append(current_item)
 
@@ -180,7 +185,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                 df_kontainer = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'NOMOR KONTINER', 'KODE UKURAN KONTAINER', 'KODE JENIS KONTAINER', 'KODE TIPE KONTAINER', 'NOMOR SEGEL'])
                 df_komponenbiaya = pd.DataFrame(columns=['NOMOR AJU', 'JENIS NILAI', 'HARGA INVOICE', 'PEMBAYARAN TIDAK LANGSUNG', 'DISKON'])
 
-                # Sheet BARANG dengan kolom lengkap
                 barang_columns = [
                     'NOMOR AJU', 'SERI BARANG', 'HS', 'KODE BARANG', 'URAIAN', 'MEREK', 'TIPE', 'UKURAN', 
                     'SPESIFIKASI LAIN', 'KODE SATUAN', 'JUMLAH SATUAN', 'KODE KEMASAN', 'JUMLAH KEMASAN', 
@@ -200,7 +204,6 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
 
                 if items_data:
                     df_barang = pd.DataFrame(items_data)
-                    # Pastikan semua kolom standar ada
                     for col in barang_columns:
                         if col not in df_barang.columns:
                             df_barang[col] = None
@@ -247,7 +250,7 @@ if st.button("🚀 Generate Excel CEISA 4.0", use_container_width=True):
                     df_versi.to_excel(writer, sheet_name="VERSI", index=False)
                     df_respon.to_excel(writer, sheet_name="RESPON", index=False)
 
-                st.success(f"✅ File Excel CEISA 4.0 untuk Nomor Aju {nomor_aju} berhasil di-generate dengan Sheet Barang terisi!")
+                st.success(f"✅ File Excel CEISA 4.0 untuk Nomor Aju {nomor_aju} berhasil di-generate!")
 
                 st.download_button(
                     label="⬇️ Download Excel Format CEISA 4.0",
