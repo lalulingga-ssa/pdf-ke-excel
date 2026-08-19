@@ -281,7 +281,7 @@ if generate_btn:
                     df_header.loc[0, 'KODE KANTOR'] = 50100
                     df_header.loc[0, 'NDPBM'] = ndpbm_input
 
-                # Update Sheet Entitas
+                # Sheet Entitas
                 df_entitas = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI', 'KODE ENTITAS', 'KODE JENIS IDENTITAS', 'NOMOR IDENTITAS', 
                     'NAMA ENTITAS', 'ALAMAT ENTITAS', 'NIB ENTITAS', 'KODE JENIS API', 'KODE STATUS', 
@@ -291,7 +291,7 @@ if generate_btn:
                 
                 df_dokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE DOKUMEN', 'NOMOR DOKUMEN', 'TANGGAL DOKUMEN', 'KODE FASILITAS', 'KODE IJIN'])
                 
-                # --- UPDATE STRUKTUR SHEET PENGANGKUT ---
+                # Sheet Pengangkut
                 df_pengangkut = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI', 'KODE CARA ANGKUT', 'NAMA PENGANGKUT', 'NOMOR PENGANGKUT', 
                     'KODE BENDERA', 'CALL SIGN', 'FLAG ANGKUT PLB', 'CARA PENGANGKUTAN LAINNYA'
@@ -299,7 +299,14 @@ if generate_btn:
                 
                 df_kemasan = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE KEMASAN', 'JUMLAH KEMASAN', 'MEREK', 'NOMOR SEGEL'])
                 df_kontainer = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'NOMOR KONTINER', 'KODE UKURAN KONTAINER', 'KODE JENIS KONTAINER', 'KODE TIPE KONTAINER', 'NOMOR SEGEL'])
-                df_komponenbiaya = pd.DataFrame(columns=['NOMOR AJU', 'JENIS NILAI', 'HARGA INVOICE', 'PEMBAYARAN TIDAK LANGSUNG', 'DISKON'])
+                
+                # --- UPDATE STRUKTUR SHEET KOMPONENBIAYA ---
+                df_komponenbiaya = pd.DataFrame(columns=[
+                    'NOMOR AJU', 'JENIS NILAI', 'HARGA INVOICE', 'PEMBAYARAN TIDAK LANGSUNG', 'DISKON',
+                    'KOMISI PENJUALAN', 'BIAYA PENGEMASAN', 'BIAYA PENGEPAKAN', 'ASSIST', 'ROYALTI',
+                    'PROCEEDS', 'BIAYA TRANSPORTASI', 'BIAYA PEMUATAN', 'ASURANSI', 'GARANSI',
+                    'BIAYA KEPENTINGAN SENDIRI', 'BIAYA PASCA IMPOR', 'BIAYA PAJAK INTERNAL', 'BUNGA', 'DEVIDEN'
+                ])
 
                 barang_columns = [
                     'NOMOR AJU', 'SERI BARANG', 'HS', 'KODE BARANG', 'URAIAN', 'MEREK', 'TIPE', 'UKURAN', 
