@@ -112,7 +112,11 @@ if generate_btn:
                 inv_text = ""
                 if inv_file:
                     with pdfplumber.open(inv_file) as pdf:
-                        inv_text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                        for page in pdf.pages:
+                            # Gunakan extraction tabel atau teks berbasis layout
+                            p_text = page.extract_text()
+                            if p_text:
+                                inv_text += p_text + "\n"
 
                 # [B] EKSTRAKSI TEKS PDF PACKING LIST (Untuk Netto)
                 pl_text = ""
@@ -128,14 +132,16 @@ if generate_btn:
                         netto_matches = re.findall(r"Net weight\s*([\d\.]+)\s*kg", pl_text, re.IGNORECASE)
                     netto_values = [float(w) for w in netto_matches]
 
-                # Ekstraksi baris dari Invoice
+                # Ekstraksi baris dari Invoice dengan fokus pada Deskripsi (Uraian) dan Prosind Code
                 lines = inv_text.split("\n")
                 current_item = {}
                 seri_counter = 1
 
                 for i, line in enumerate(lines):
-                    line = line.strip()
-                    if "Prosind Code -" in line:
+                    line_clean = line.strip()
+                    
+                    # Deteksi Prosind Code (penanda item barang)
+                    if "Prosind Code -" in line_clean:
                         if current_item:
                             items_data.append(current_item)
                             current_item = {}
@@ -144,50 +150,38 @@ if generate_btn:
                         current_item["SERI BARANG"] = seri_counter
                         seri_counter += 1
                         
-                        current_item["KODE BARANG"] = line.split("-")[-1].strip()
+                        current_item["KODE BARANG"] = line_clean.split("-")[-1].strip()
                         
+                        # Ambil Uraian (Description) dari baris persis di atas Prosind Code
                         if i > 0:
-                            prev_line = lines[i - 1].strip()
-                            match_desc_qty = re.match(r"^(.*?)\s+(\d+)$", prev_line)
+                            desc_candidate = lines[i - 1].strip()
+                            # Bersihkan jika ada angka quantity di ujung baris deskripsi (misal: "Main bearing set - undersized 4")
+                            match_desc_qty = re.match(r"^(.*?)\s+(\d+)$", desc_candidate)
                             if match_desc_qty:
                                 current_item["URAIAN"] = match_desc_qty.group(1).strip().upper()
                                 current_item["JUMLAH SATUAN"] = int(match_desc_qty.group(2))
                             else:
-                                current_item["URAIAN"] = prev_line.upper()
+                                current_item["URAIAN"] = desc_candidate.upper()
                                 current_item["JUMLAH SATUAN"] = 1
 
-                    # Perbaikan deteksi HS Code yang lebih fleksibel
-                    elif "HS Code" in line or "HS" in line:
-                        hs_match = re.search(r"(?:HS Code|HS)\s*[:\-]?\s*([\d\.]+)", line, re.IGNORECASE)
+                    # Deteksi HS Code
+                    elif "HS Code" in line_clean or "HS" in line_clean:
+                        hs_match = re.search(r"(?:HS Code|HS)\s*[:\-]?\s*([\d\.]+)", line_clean, re.IGNORECASE)
                         if hs_match and current_item:
                             current_item["HS"] = hs_match.group(1).replace(".", "")
                         
-                        price_hs_match = re.search(r"(\d+)\s+([\d\.]+)\s+([\d\.]+)$", line)
+                        price_hs_match = re.search(r"(\d+)\s+([\d\.]+)\s+([\d\.]+)$", line_clean)
                         if price_hs_match and current_item:
                             current_item["HARGA SATUAN"] = float(price_hs_match.group(2))
                             cif_val = float(price_hs_match.group(3))
                             current_item["CIF"] = cif_val
                             current_item["FOB"] = cif_val
 
-                # Deteksi alternatif jika HS Code berada di baris terpisah atau menggunakan format angka khusus
-                for item in items_data:
-                    if "HS" not in item:
-                        # Cari di baris sekitar Prosind Code atau Invoice text
-                        for line in lines:
-                            if item.get("KODE BARANG") and item["KODE BARANG"] in line:
-                                pass
-                            # Cari pola 6 digit angka HS
-                            hs_fallback = re.search(r"\b(\d{6})\b", line)
-                            if hs_fallback and "HS" not in item:
-                                # Pastikan bukan Qty atau harga
-                                val = hs_fallback.group(1)
-                                if val != str(item.get("JUMLAH SATUAN")):
-                                    item["HS"] = val
-
+                # Tangkap harga/CIF dari baris format reguler jika ada
                 for i, line in enumerate(lines):
-                    line = line.strip()
+                    line_clean = line.strip()
                     price_pattern = re.compile(r"^(\d+)\s+([\d\.]+)\s+([\d\.]+)$")
-                    price_match = price_pattern.match(line)
+                    price_match = price_pattern.match(line_clean)
                     if price_match and len(items_data) > 0:
                         seri_num = int(price_match.group(1))
                         for item in items_data:
@@ -200,10 +194,13 @@ if generate_btn:
                 if current_item:
                     items_data.append(current_item)
 
+                # Mapping nilai default dan atribut tambahan ke setiap item barang
                 for idx, item in enumerate(items_data):
-                    # Pastikan kolom HS memiliki nilai (jika kosong, default ke string kosong atau format standar)
                     if "HS" not in item:
                         item["HS"] = ""
+
+                    if "URAIAN" not in item or not item["URAIAN"]:
+                        item["URAIAN"] = f"BARANG IMPORT SERI {idx+1}"
 
                     if idx < len(netto_values):
                         item["NETTO"] = netto_values[idx]
