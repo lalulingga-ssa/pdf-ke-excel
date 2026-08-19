@@ -153,10 +153,10 @@ if generate_btn:
                         else:
                             current_item["KODE BARANG"] = line_clean.split("-")[-1].strip()
                         
-                        # Ambil Uraian & QTY dari baris persis sebelumnya (contoh: "1Main bearing set - undersized")
+                        # Ambil Uraian & QTY secara akurat dari baris persis sebelumnya
                         if i > 0:
                             raw_prev = lines[i - 1].strip()
-                            desc_match = re.match(r"^(\d+)(.*)$", raw_prev)
+                            desc_match = re.match(r"^(\d+)(.+)$", raw_prev)
                             if desc_match:
                                 current_item["JUMLAH SATUAN"] = int(desc_match.group(1))
                                 current_item["URAIAN"] = desc_match.group(2).strip().upper()
