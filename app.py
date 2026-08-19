@@ -73,7 +73,6 @@ st.info("ℹ️ Unggah dokumen Invoice dan Packing List di bawah ini untuk langs
 # --- 4. AREA UPLOAD DOKUMEN PENDUKUNG (2 Baris Seimbang, Tanpa Scroll) ---
 st.subheader("📥 Unggah Dokumen Pendukung")
 
-# Baris Pertama (3 Kolom utama: Invoice, Packing List, House B/L)
 c1, c2, c3 = st.columns(3)
 with c1:
     inv_file = st.file_uploader("1. Invoice (PDF)", type="pdf", key="inv")
@@ -82,7 +81,6 @@ with c2:
 with c3:
     hbl_file = st.file_uploader("3. House B/L (PDF)", type="pdf", key="hbl")
 
-# Baris Kedua (2 Kolom dokumen + 1 Kolom Catatan agar simetris)
 c4, c5, c6 = st.columns(3)
 with c4:
     mbl_file = st.file_uploader("4. Master B/L (PDF)", type="pdf", key="mbl")
@@ -113,7 +111,6 @@ if generate_btn:
                 if inv_file:
                     with pdfplumber.open(inv_file) as pdf:
                         for page in pdf.pages:
-                            # Gunakan extraction tabel atau teks berbasis layout
                             p_text = page.extract_text()
                             if p_text:
                                 inv_text += p_text + "\n"
@@ -140,8 +137,7 @@ if generate_btn:
                 for i, line in enumerate(lines):
                     line_clean = line.strip()
                     
-                    # Deteksi Prosind Code (penanda item barang)
-                    if "Prosind Code -" in line_clean:
+                    if "Prosind Code" in line_clean:
                         if current_item:
                             items_data.append(current_item)
                             current_item = {}
@@ -150,21 +146,21 @@ if generate_btn:
                         current_item["SERI BARANG"] = seri_counter
                         seri_counter += 1
                         
-                        current_item["KODE BARANG"] = line_clean.split("-")[-1].strip()
+                        # Ekstraksi kode barang (Prosind Code)
+                        code_match = re.search(r"(\d{6})", line_clean)
+                        if code_match:
+                            current_item["KODE BARANG"] = code_match.group(1)
+                        else:
+                            current_item["KODE BARANG"] = line_clean.split("-")[-1].strip()
                         
-                        # Ambil Uraian (Description) dari baris persis di atas Prosind Code
+                        # Ambil Uraian (Description) secara bersih dari baris sebelumnya
                         if i > 0:
-                            desc_candidate = lines[i - 1].strip()
-                            # Bersihkan jika ada angka quantity di ujung baris deskripsi (misal: "Main bearing set - undersized 4")
-                            match_desc_qty = re.match(r"^(.*?)\s+(\d+)$", desc_candidate)
-                            if match_desc_qty:
-                                current_item["URAIAN"] = match_desc_qty.group(1).strip().upper()
-                                current_item["JUMLAH SATUAN"] = int(match_desc_qty.group(2))
-                            else:
-                                current_item["URAIAN"] = desc_candidate.upper()
-                                current_item["JUMLAH SATUAN"] = 1
+                            raw_desc = lines[i - 1].strip()
+                            # Bersihkan nomor urut di awal baris jika ada (misal: "1Main bearing" -> "Main bearing")
+                            clean_desc = re.sub(r"^\d+\s*", "", raw_desc)
+                            current_item["URAIAN"] = clean_desc.strip().upper()
+                            current_item["JUMLAH SATUAN"] = 1  # Default QTY
 
-                    # Deteksi HS Code
                     elif "HS Code" in line_clean or "HS" in line_clean:
                         hs_match = re.search(r"(?:HS Code|HS)\s*[:\-]?\s*([\d\.]+)", line_clean, re.IGNORECASE)
                         if hs_match and current_item:
@@ -177,7 +173,6 @@ if generate_btn:
                             current_item["CIF"] = cif_val
                             current_item["FOB"] = cif_val
 
-                # Tangkap harga/CIF dari baris format reguler jika ada
                 for i, line in enumerate(lines):
                     line_clean = line.strip()
                     price_pattern = re.compile(r"^(\d+)\s+([\d\.]+)\s+([\d\.]+)$")
