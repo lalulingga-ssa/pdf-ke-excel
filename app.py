@@ -156,8 +156,9 @@ if generate_btn:
                                 current_item["URAIAN"] = prev_line.upper()
                                 current_item["JUMLAH SATUAN"] = 1
 
-                    elif "HS Code" in line:
-                        hs_match = re.search(r"HS Code\s+([\d\.]+)", line)
+                    # Perbaikan deteksi HS Code yang lebih fleksibel
+                    elif "HS Code" in line or "HS" in line:
+                        hs_match = re.search(r"(?:HS Code|HS)\s*[:\-]?\s*([\d\.]+)", line, re.IGNORECASE)
                         if hs_match and current_item:
                             current_item["HS"] = hs_match.group(1).replace(".", "")
                         
@@ -167,6 +168,21 @@ if generate_btn:
                             cif_val = float(price_hs_match.group(3))
                             current_item["CIF"] = cif_val
                             current_item["FOB"] = cif_val
+
+                # Deteksi alternatif jika HS Code berada di baris terpisah atau menggunakan format angka khusus
+                for item in items_data:
+                    if "HS" not in item:
+                        # Cari di baris sekitar Prosind Code atau Invoice text
+                        for line in lines:
+                            if item.get("KODE BARANG") and item["KODE BARANG"] in line:
+                                pass
+                            # Cari pola 6 digit angka HS
+                            hs_fallback = re.search(r"\b(\d{6})\b", line)
+                            if hs_fallback and "HS" not in item:
+                                # Pastikan bukan Qty atau harga
+                                val = hs_fallback.group(1)
+                                if val != str(item.get("JUMLAH SATUAN")):
+                                    item["HS"] = val
 
                 for i, line in enumerate(lines):
                     line = line.strip()
@@ -185,6 +201,10 @@ if generate_btn:
                     items_data.append(current_item)
 
                 for idx, item in enumerate(items_data):
+                    # Pastikan kolom HS memiliki nilai (jika kosong, default ke string kosong atau format standar)
+                    if "HS" not in item:
+                        item["HS"] = ""
+
                     if idx < len(netto_values):
                         item["NETTO"] = netto_values[idx]
                     else:
