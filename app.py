@@ -350,7 +350,6 @@ if generate_btn:
                     'JUMLAH DILEKATKAN', 'JUMLAH PITA CUKAI', 'HJE CUKAI', 'TARIF CUKAI'
                 ])
                 
-                # --- UPDATE STRUKTUR SHEET BAHANBAKUTARIF ---
                 df_bahanbakutarif = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE ASAL BAHAN BAKU', 
                     'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 'KODE FASILITAS', 'TARIF FASILITAS', 
@@ -360,7 +359,12 @@ if generate_btn:
                     'KODE KEMASAN', 'JUMLAH KEMASAN'
                 ])
                 
-                df_bahanbakudokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'SERI DOKUMEN'])
+                # --- UPDATE STRUKTUR SHEET BAHANBAKUDOKUMEN ---
+                df_bahanbakudokumen = pd.DataFrame(columns=[
+                    'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE_ASAL_BAHAN_BAKU', 
+                    'SERI DOKUMEN', 'SERI IZIN'
+                ])
+                
                 df_pungutan = pd.DataFrame(columns=['NOMOR AJU', 'KODE FASILITAS TARIF', 'KODE JENIS PUNGUTAN', 'NILAI PUNGUTAN'])
                 df_jaminan = pd.DataFrame(columns=['NOMOR AJU', 'KODE KANTOR', 'KODE JAMINAN', 'NOMOR JAMINAN'])
                 df_bankdevisa = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE', 'NAMA'])
