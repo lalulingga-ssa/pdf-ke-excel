@@ -352,10 +352,11 @@ if generate_btn:
                 
                 # --- UPDATE STRUKTUR SHEET BAHANBAKUTARIF ---
                 df_bahanbakutarif = pd.DataFrame(columns=[
-                    'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE ASAL BAHAN BAKU', 'KODE PUNGUTAN', 
-                    'KODE TARIF', 'TARIF', 'KODE FASILITAS', 'TARIF FASILITAS', 'NILAI BAYAR', 'NILAI FASILITAS', 
-                    'NILAI SUDAH DILUNASI', 'KODE SATUAN', 'JUMLAH SATUAN', 'FLAG BMT SEMENTARA', 
-                    'KODE KOMODITI CUKAI', 'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 
+                    'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE ASAL BAHAN BAKU', 
+                    'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 'KODE FASILITAS', 'TARIF FASILITAS', 
+                    'NILAI BAYAR', 'NILAI FASILITAS', 'NILAI SUDAH DILUNASI', 'KODE SATUAN', 
+                    'JUMLAH SATUAN', 'FLAG BMT SEMENTARA', 'KODE KOMODITI CUKAI', 
+                    'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 
                     'KODE KEMASAN', 'JUMLAH KEMASAN'
                 ])
                 
