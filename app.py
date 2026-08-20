@@ -350,17 +350,17 @@ if generate_btn:
                     'JUMLAH DILEKATKAN', 'JUMLAH PITA CUKAI', 'HJE CUKAI', 'TARIF CUKAI'
                 ])
                 
-                # --- UPDATE STRUKTUR SHEET BAHANBAKUTARIF SESUAI PERMINTAAN (PERBAIKAN KOLOM U-Y) ---
+                # --- UPDATE STRUKTUR SHEET BAHANBAKUTARIF: TERMASUK DUPLIKASI (KOLOM A S/D Y) ---
                 df_bahanbakutarif = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE ASAL BAHAN BAKU', 
                     'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 'KODE FASILITAS', 'TARIF FASILITAS', 
                     'NILAI BAYAR', 'NILAI FASILITAS', 'NILAI SUDAH DILUNASI', 'KODE SATUAN', 
                     'JUMLAH SATUAN', 'FLAG BMT SEMENTARA', 'KODE KOMODITI CUKAI', 
-                    'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 
-                    'KODE KEMASAN', 'JUMLAH KEMASAN'
+                    'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 'KODE KEMASAN', 
+                    'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 'KODE KEMASAN', 
+                    'JUMLAH KEMASAN'
                 ])
                 
-                # --- PERTAHANKAN UPDATE SEBELUMNYA ---
                 df_bahanbakudokumen = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE_ASAL_BAHAN_BAKU', 
                     'SERI DOKUMEN', 'SERI IZIN'
