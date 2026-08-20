@@ -18,7 +18,7 @@ st.markdown("""
 # --- 2. HEADER ---
 st.markdown("""
     <div class='header-box'>
-        <h3 style='margin:0; color:#1e293b;'>🚢 KODEX (KOmpilator DOKumen EXim)</h3>
+        <h3 style='margin:0; color:#1e293b;'>🚢 KODEX (Kompilator Dokumen Exim)</h3>
         <p style='margin:0; font-size: 0.9em; color:#475569;'>PT. Setia Samudera Abadi | Automasi CEISA 4.0</p>
     </div>
 """, unsafe_allow_html=True)
