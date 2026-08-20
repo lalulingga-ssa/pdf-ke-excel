@@ -30,7 +30,7 @@ DB_FILE = "database_customer.csv"
 def load_db():
     if os.path.exists(DB_FILE):
         return pd.read_csv(DB_FILE)
-    return pd.DataFrame(columns=["Tipe", "Nama", "Alamat", "No Identitas", "NIB Entitas"])
+    return pd.DataFrame(columns=["Tipe", "Nama", "Alamat", "No Identitas", "NIB Entitas", "Kode Negara"])
 
 def save_db(df):
     df.to_csv(DB_FILE, index=False)
@@ -47,19 +47,22 @@ with tab1:
 with tab2:
     inv_file = st.file_uploader("1. Invoice", type="pdf")
     pl_file = st.file_uploader("2. Packing List", type="pdf")
-    hbl_file = st.file_uploader("3. House/Master B/L", type="pdf")
-    bc_file = st.file_uploader("4. Manifest BC 1.1", type="pdf")
+    hbl_file = st.file_uploader("3. House B/L", type="pdf")
+    mbl_file = st.file_uploader("4. Master B/L", type="pdf")
+    bc_file = st.file_uploader("5. Manifest BC 1.1", type="pdf")
 
 with tab3:
-    st.subheader("Tambah Customer Baru")
+    st.subheader("Tambah Importir/Shipper Baru")
     with st.form("customer_form"):
         tipe_cust = st.selectbox("Tipe:", ["Shipper", "Consignee"])
-        nama_cust = st.text_input("Nama:")
+        nama_cust = st.text_input("Nama (Importir/Shipper):")
         alamat_cust = st.text_area("Alamat:")
-        id_cust = st.number_input("No Identitas:", step=1, format="%d")
-        nib_cust = st.number_input("NIB Entitas:", step=1, format="%d")
+        id_cust = st.text_input("No Identitas:")
+        nib_cust = st.text_input("NIB Entitas:")
+        negara_cust = st.text_input("Kode Negara (Contoh: ID, CN, AU):")
         if st.form_submit_button("💾 Simpan Customer"):
-            new_data = pd.DataFrame([[tipe_cust, nama_cust, alamat_cust, id_cust, nib_cust]], columns=["Tipe", "Nama", "Alamat", "No Identitas", "NIB Entitas"])
+            new_data = pd.DataFrame([[tipe_cust, nama_cust, alamat_cust, id_cust, nib_cust, negara_cust]], 
+                                    columns=["Tipe", "Nama", "Alamat", "No Identitas", "NIB Entitas", "Kode Negara"])
             save_db(pd.concat([load_db(), new_data], ignore_index=True))
             st.success("Customer disimpan!")
     
@@ -91,19 +94,19 @@ if generate_btn:
                 header_data = {'NOMOR AJU': nomor_aju, 'KODE DOKUMEN': 20, 'KODE KANTOR': "050100" if is_awb else "", 'TANGGAL PERNYATAAN': date.today().strftime('%Y-%m-%d'), 'KOTA PERNYATAAN': 'BEKASI', 'NAMA PERNYATAAN': 'MUHAMMAD SUTAN ETHANOVA PRIMOLASSA', 'JABATAN PERNYATAAN': 'PELAKSANA', 'NETTO': val_netto, 'BRUTO': val_bruto, 'NDPBM': ndpbm_input, 'FOB': 44443, 'CIF': val_cif}
                 df_header = pd.concat([pd.DataFrame(columns=['NOMOR AJU', 'KODE DOKUMEN', 'KODE KANTOR', 'TANGGAL PERNYATAAN', 'KOTA PERNYATAAN', 'NAMA PERNYATAAN', 'JABATAN PERNYATAAN', 'NETTO', 'BRUTO', 'NDPBM', 'FOB', 'CIF']), pd.DataFrame([header_data])], ignore_index=True)
 
-                # --- SHEET ENTITAS (Sesuai permintaan Anda sebelumnya) ---
-                df_entitas = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE ENTITAS', 'KODE JENIS IDENTITAS'])
-                # Logika Baris 4-7
+                # --- SHEET ENTITAS ---
+                # Struktur Entitas sudah termasuk KODE NEGARA
+                df_entitas = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE ENTITAS', 'KODE JENIS IDENTITAS', 'KODE NEGARA'])
                 data_entitas = {
                     'NOMOR AJU': [nomor_aju]*7,
                     'SERI': [10, 9, 11, 1, 7, 4, 10],
                     'KODE ENTITAS': [10, 9, 11, 1, 7, 4, 10],
-                    'KODE JENIS IDENTITAS': [None, None, None, 6, 6, 6, 6]
+                    'KODE JENIS IDENTITAS': [None, None, None, 6, 6, 6, 6],
+                    'KODE NEGARA': ['ID']*7 # Default ID, bisa disesuaikan dari DB
                 }
                 df_entitas = pd.concat([df_entitas, pd.DataFrame(data_entitas)], ignore_index=True)
 
                 # --- INISIALISASI SHEET LAINNYA ---
-                # (Disini Anda dapat meletakkan inisialisasi sheet lainnya seperti di script Anda sebelumnya)
                 df_bahanbakutarif = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE ASAL BAHAN BAKU', 'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 'KODE FASILITAS', 'TARIF FASILITAS', 'NILAI BAYAR', 'NILAI FASILITAS', 'NILAI SUDAH DILUNASI', 'KODE SATUAN', 'JUMLAH SATUAN', 'FLAG BMT SEMENTARA', 'KODE KOMODITI CUKAI', 'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 'KODE KEMASAN', 'KODE SUB KOMODITI CUKAI', 'FLAG TIS', 'FLAG PELEKATAN', 'KODE KEMASAN', 'JUMLAH KEMASAN'])
                 df_bahanbakudokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE_ASAL_BAHAN_BAKU', 'SERI DOKUMEN', 'SERI IZIN'])
                 df_pungutan = pd.DataFrame(columns=['NOMOR AJU', 'KODE FASILITAS TARIF', 'KODE JENIS PUNGUTAN', 'NILAI PUNGUTAN', 'NPWP BILLING'])
