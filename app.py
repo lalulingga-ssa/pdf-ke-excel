@@ -239,7 +239,7 @@ if generate_btn:
                     item["NILAI JASA"] = 0
                     item["KODE JENIS NILAI"] = "LAI"
                     item["KODE KONDISI BARANG"] = 1
-                    item["KODE NEGARA ASAL"] = "AU"
+                    item["KODE NEGARA ASIL"] = "AU"
                     item["ISI PER KEMASAN"] = 0
                     item["METODE PENENTUAN NILAI"] = "Metode 1"
                     item["STATEMENT PERBEDAAN HARGA"] = "T"
@@ -360,14 +360,17 @@ if generate_btn:
                 ])
                 
                 df_bahanbakudokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE_ASAL_BAHAN_BAKU', 'SERI DOKUMEN', 'SERI IZIN'])
-                
-                # --- UPDATE STRUKTUR SHEET PUNGUTAN ---
                 df_pungutan = pd.DataFrame(columns=[
                     'NOMOR AJU', 'KODE FASILITAS TARIF', 'KODE JENIS PUNGUTAN', 
                     'NILAI PUNGUTAN', 'NPWP BILLING'
                 ])
                 
-                df_jaminan = pd.DataFrame(columns=['NOMOR AJU', 'KODE KANTOR', 'KODE JAMINAN', 'NOMOR JAMINAN'])
+                # --- UPDATE STRUKTUR SHEET JAMINAN ---
+                df_jaminan = pd.DataFrame(columns=[
+                    'NOMOR AJU', 'KODE KANTOR', 'KODE JAMINAN', 'NOMOR JAMINAN', 'TANGGAL JAMINAN',
+                    'NILAI JAMINAN', 'PENJAMIN', 'TANGGAL JATUH TEMPO', 'NOMOR BPJ', 'TANGGAL BPJ'
+                ])
+                
                 df_bankdevisa = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE', 'NAMA'])
                 df_versi = pd.DataFrame({'VERSI': [1.3]})
                 df_respon = pd.DataFrame(columns=['NOMOR AJU', 'KODE RESPON', 'NOMOR RESPON', 'TANGGAL RESPON'])
