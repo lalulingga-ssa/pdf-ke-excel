@@ -246,7 +246,6 @@ if generate_btn:
 
                 # [C] STRUKTUR MULTI-SHEET CEISA 4.0
                 
-                # Tentukan Kode Dokumen berdasarkan pilihan (20 untuk PIB BC 2.0, 30 untuk PEB BC 3.0)
                 kode_dok_val = 20 if "PIB" in jenis_pemberitahuan else 30
 
                 header_cols = [
@@ -290,17 +289,12 @@ if generate_btn:
                 ])
                 
                 df_dokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE DOKUMEN', 'NOMOR DOKUMEN', 'TANGGAL DOKUMEN', 'KODE FASILITAS', 'KODE IJIN'])
-                
-                # Sheet Pengangkut
                 df_pengangkut = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI', 'KODE CARA ANGKUT', 'NAMA PENGANGKUT', 'NOMOR PENGANGKUT', 
                     'KODE BENDERA', 'CALL SIGN', 'FLAG ANGKUT PLB', 'CARA PENGANGKUTAN LAINNYA'
                 ])
-                
                 df_kemasan = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'KODE KEMASAN', 'JUMLAH KEMASAN', 'MEREK', 'NOMOR SEGEL'])
                 df_kontainer = pd.DataFrame(columns=['NOMOR AJU', 'SERI', 'NOMOR KONTINER', 'KODE UKURAN KONTAINER', 'KODE JENIS KONTAINER', 'KODE TIPE KONTAINER', 'NOMOR SEGEL'])
-                
-                # Sheet Komponen Biaya
                 df_komponenbiaya = pd.DataFrame(columns=[
                     'NOMOR AJU', 'JENIS NILAI', 'HARGA INVOICE', 'PEMBAYARAN TIDAK LANGSUNG', 'DISKON',
                     'KOMISI PENJUALAN', 'BIAYA PENGEMASAN', 'BIAYA PENGEPAKAN', 'ASSIST', 'ROYALTI',
@@ -334,7 +328,6 @@ if generate_btn:
                 else:
                     df_barang = pd.DataFrame(columns=barang_columns)
 
-                # Sheet Barang Tarif
                 df_barangtarif = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI BARANG', 'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 
                     'KODE FASILITAS', 'TARIF FASILITAS', 'NILAI BAYAR', 'NILAI FASILITAS', 
@@ -346,14 +339,19 @@ if generate_btn:
                 df_barangdokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI DOKUMEN', 'SERI IZIN'])
                 df_barangentitas = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI ENTITAS'])
                 df_barangspekkhusus = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'KODE', 'URAIAN'])
+                df_barangvd = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'KODE VD', 'NILAI BARANG', 'BIAYA TAMBAHAN', 'BIAYA PENGURANG', 'JATUH TEMPO'])
                 
-                # --- UPDATE STRUKTUR SHEET BARANGVD ---
-                df_barangvd = pd.DataFrame(columns=[
-                    'NOMOR AJU', 'SERI BARANG', 'KODE VD', 'NILAI BARANG', 
-                    'BIAYA TAMBAHAN', 'BIAYA PENGURANG', 'JATUH TEMPO'
+                # --- UPDATE STRUKTUR SHEET BAHANBAKU ---
+                df_bahanbaku = pd.DataFrame(columns=[
+                    'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE ASAL BAHAN BAKU', 'HS', 'KODE BARANG', 
+                    'URAIAN', 'MEREK', 'TIPE', 'UKURAN', 'SPESIFIKASI LAIN', 'KODE SATUAN', 'JUMLAH SATUAN', 
+                    'KODE KEMASAN', 'JUMLAH KEMASAN', 'KODE DOKUMEN ASAL', 'KODE KANTOR ASAL', 'NOMOR DAFTAR ASAL', 
+                    'TANGGAL DAFTAR ASAL', 'NOMOR AJU ASAL', 'SERI BARANG ASAL', 'NETTO', 'BRUTO', 'VOLUME', 
+                    'CIF', 'CIF RUPIAH', 'NDPBM', 'HARGA PENYERAHAN', 'HARGA PEROLEHAN', 'NILAI JASA', 'SERI IZIN', 
+                    'VALUTA', 'KODE BKC', 'KODE KOMODITI BKC', 'KODE SUB KOMODITI BKC', 'FLAG TIS', 'ISI PER KEMASAN', 
+                    'JUMLAH DILEKATKAN', 'JUMLAH PITA CUKAI', 'HJE CUKAI', 'TARIF CUKAI'
                 ])
                 
-                df_bahanbaku = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'HS', 'KODE BARANG', 'URAIAN'])
                 df_bahanbakutarif = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE PUNGUTAN'])
                 df_bahanbakudokumen = pd.DataFrame(columns=['NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'SERI DOKUMEN'])
                 df_pungutan = pd.DataFrame(columns=['NOMOR AJU', 'KODE FASILITAS TARIF', 'KODE JENIS PUNGUTAN', 'NILAI PUNGUTAN'])
