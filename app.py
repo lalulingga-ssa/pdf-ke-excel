@@ -350,7 +350,7 @@ if generate_btn:
                     'JUMLAH DILEKATKAN', 'JUMLAH PITA CUKAI', 'HJE CUKAI', 'TARIF CUKAI'
                 ])
                 
-                # --- UPDATE STRUKTUR SHEET BAHANBAKUTARIF ---
+                # --- UPDATE STRUKTUR SHEET BAHANBAKUTARIF SESUAI PERMINTAAN (PERBAIKAN KOLOM U-Y) ---
                 df_bahanbakutarif = pd.DataFrame(columns=[
                     'NOMOR AJU', 'SERI BARANG', 'SERI BAHAN BAKU', 'KODE ASAL BAHAN BAKU', 
                     'KODE PUNGUTAN', 'KODE TARIF', 'TARIF', 'KODE FASILITAS', 'TARIF FASILITAS', 
